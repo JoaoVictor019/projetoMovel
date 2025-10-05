@@ -33,7 +33,7 @@ const CadastroScreen = () => {
     };
 
     try {
-      const response = await fetch(`http://172.16.15.23/api/cadastrar_usuario/`, {  // Ajuste na URL da requisição
+      const response = await fetch(`https://verbose-acorn-69rxjwv5x67q35gp4-8000.app.github.dev/api/cadastrar_usuario/`, {  // Ajuste na URL da requisição
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
