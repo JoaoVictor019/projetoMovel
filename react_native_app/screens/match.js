@@ -36,7 +36,7 @@ const MatchScreen = () => {
     };
 
     const renderCarona = ({ item }) => (
-        <TouchableOpacity style={styles.container} onPress={() => handlePress('item')}>
+        <TouchableOpacity style={styles.container} onPress={() => handlePress(item)}>
             <View style={styles.circle}>
                 <Image source={{ uri: item.foto }} style={styles.userImage} />
             </View>
@@ -152,13 +152,11 @@ const styles = StyleSheet.create({
     },
     rowContainer: {
         flexDirection: 'row',
-        alignItems: 'flex-start', // Alinha os ícones e textos na parte superior
+        alignItems: 'flex-start',
         marginTop: 5,
     },
     infoTextContainer: {
-        marginLeft: 8,
         marginLeft: 20,
-
     },
     labelText: {
         color: '#999',
@@ -171,13 +169,13 @@ const styles = StyleSheet.create({
     },
     separator: {
         marginTop: 35,
-        height: 158, // Altura da linha vertical
-        width: 4, // Largura da linha
-        backgroundColor: '#4f0466', // Cor da linha
+        height: 158,
+        width: 4,
+        backgroundColor: '#4f0466',
         position: 'absolute',
-        left: 26, // Ajuste a posição da linha conforme necessário
-        top: 0, // Começa do topo do container
-        bottom: 0, // Vai até o fundo do container
+        left: 26,
+        top: 0,
+        bottom: 0,
     },
     icon: {
         marginTop: 12,

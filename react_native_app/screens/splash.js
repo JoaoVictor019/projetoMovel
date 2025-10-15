@@ -47,9 +47,9 @@ const SplashScreen = () => {
     return (
         <View style={styles.container}>
             <Image
-                source={require('../images/logo.png')} // Caminho atualizado para o logo
-                style={styles.logo}
-                resizeMode="contain"
+                 source={require('../react_native_app/images/logo.png')}
+                 style={styles.logo}
+                 resizeMode="contain"
             />
 
             {/* Barra de progresso */}

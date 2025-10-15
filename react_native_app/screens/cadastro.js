@@ -1,4 +1,4 @@
-import { supabase } from '../supabase'; // no topo do arquivo
+import { supabase } from '../react_native_app/supabase';
 
 const handleCadastroUsuario = async () => {
   if (!email.endsWith('@unimetrocamp.edu.br')) {

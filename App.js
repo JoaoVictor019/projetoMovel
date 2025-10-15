@@ -1,21 +1,20 @@
 import React from 'react';
-import { AppRegistry } from 'react-native'; 
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import SplashScreen from './screens/splash';
-import LoginScreen from './screens/login'; 
-import CadastroScreen from './screens/cadastro'; 
-import HomeScreen from './screens/home';
-import BuscarCarona from './screens/busca';
-import OferecerCarona from './screens/oferecer';
-import CadastroCarro from './screens/carro';
-import MatchScreen from './screens/match';
-import ConfirmarCarona from './screens/confirmar';
-import { name as VaiJunto } from './app.json'; 
+
+import SplashScreen from './react_native_app/screens/splash';
+import LoginScreen from './react_native_app/screens/login'; 
+import CadastroScreen from './react_native_app/screens/cadastro'; 
+import HomeScreen from './react_native_app/screens/home';
+import BuscarCarona from './react_native_app/screens/busca';
+import OferecerCarona from './react_native_app/screens/oferecer';
+import CadastroCarro from './react_native_app/screens/carro';
+import MatchScreen from './react_native_app/screens/match';
+import ConfirmarCarona from './react_native_app/screens/confirmar';
 
 const Stack = createStackNavigator();
 
-const App = () => {
+export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Splash">
@@ -34,7 +33,7 @@ const App = () => {
           component={CadastroScreen}      
           options={{ headerShown: false }}
         />
-      <Stack.Screen 
+        <Stack.Screen 
           name="Home"
           component={HomeScreen}
           options={{ headerShown: false }}
@@ -53,12 +52,12 @@ const App = () => {
           name="Carro"
           component={CadastroCarro}
           options={{ headerShown: false}}
-          />
+        />
         <Stack.Screen
           name="Match"
           component={MatchScreen}
           options={{ headerShown: false}}
-          />
+        />
         <Stack.Screen
           name="Confirmar"
           component={ConfirmarCarona}
@@ -67,7 +66,4 @@ const App = () => {
       </Stack.Navigator>
     </NavigationContainer>
   );
-};
-AppRegistry.registerComponent(VaiJunto, () => App);
-
-export default App;
+}

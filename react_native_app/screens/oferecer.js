@@ -1,4 +1,4 @@
-import { supabase } from '../supabase'; // no topo
+import { supabase } from '../react_native_app/supabase'; // no topo
 
 const handleOferecer = async () => {
   const user = supabase.auth.user();

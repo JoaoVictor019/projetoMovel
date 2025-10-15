@@ -1,5 +1,8 @@
 {
   "dependencies": {
-    "@supabase/supabase-js": "^2.75.0"
+    "@supabase/supabase-js": "^2.75.0",
+    "expo": "^54.0.13",
+    "react-dom": "19.1.0",
+    "react-native-web": "^0.21.0"
   }
 }
