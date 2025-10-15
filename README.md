@@ -60,7 +60,7 @@ No diretório 'django_backend', siga os passos:
 
 ### Rodando o Projeto
 Após instalar todas as dependências, você pode iniciar o projeto com o comando:
-- **expo start**
+- **npm start**
 
 ### Verificando o Banco de dados
 Execute o comando **python manage.py runserver "IP LOCAL":800**
