@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -28,11 +29,42 @@ const CadastroScreen = () => {
 
   const navigation = useNavigation();
 
-  const handleCadastroUsuario = async () => {
+  const validarCampos = () => {
+    if (
+      !nomeCompleto.trim() ||
+      !cpf.trim() ||
+      !email.trim() ||
+      !telefone.trim() ||
+      !matricula.trim() ||
+      !curso.trim() ||
+      !senha.trim() ||
+      !confirmarSenha.trim()
+    ) {
+      Alert.alert('Atenção', 'Por favor, preencha todos os campos.');
+      return false;
+    }
+
+    if (cpf.length !== 11 || !/^\d+$/.test(cpf)) {
+      Alert.alert('Atenção', 'CPF inválido. Deve conter 11 dígitos numéricos.');
+      return false;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      Alert.alert('Atenção', 'E-mail inválido.');
+      return false;
+    }
+
     if (senha !== confirmarSenha) {
       Alert.alert('Erro', 'As senhas não coincidem!');
-      return;
+      return false;
     }
+
+    return true;
+  };
+
+  const handleCadastroUsuario = async () => {
+    if (!validarCampos()) return;
 
     const dadosCadastro = {
       nome: nomeCompleto,
@@ -52,8 +84,11 @@ const CadastroScreen = () => {
         body: JSON.stringify(dadosCadastro),
       });
 
+      const responseText = await response.text();
+      console.log('Status da resposta:', response.status);
+      console.log('Corpo da resposta:', responseText);
+
       if (response.ok) {
-        // mostra alerta com botão OK — só navega após usuário confirmar
         Alert.alert(
           'Sucesso',
           'Usuário cadastrado com sucesso!',
@@ -61,15 +96,15 @@ const CadastroScreen = () => {
             {
               text: 'OK',
               onPress: () => {
-                // Se preferir voltar para a tela anterior use navigation.goBack()
-                navigation.navigate('Home'); 
+                setTimeout(() => {
+                  navigation.navigate('Home');
+                }, 100);
               },
             },
           ],
           { cancelable: false }
         );
       } else {
-        console.error('Erro ao cadastrar usuário:', response.status);
         Alert.alert('Erro', 'Não foi possível cadastrar o usuário.');
       }
     } catch (error) {
@@ -101,90 +136,23 @@ const CadastroScreen = () => {
     >
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <SafeAreaView style={styles.innerContainer}>
-
-          {/* Botão Voltar no topo */}
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => {
-              // Use navigate('Home') ou goBack() conforme sua navegação
-              navigation.navigate('Home');
-              // navigation.goBack();
-            }}
+            onPress={() => navigation.navigate('Home')}
           >
             <Text style={styles.backText}>← Voltar</Text>
           </TouchableOpacity>
 
           <Text style={styles.title}>VaiJunto?</Text>
 
-          <TextInput
-            style={styles.input}
-            placeholder="Nome completo"
-            placeholderTextColor="#ccc"
-            value={nomeCompleto}
-            onChangeText={setNomeCompleto}
-          />
-
-          <TextInput
-            style={styles.input}
-            placeholder="CPF"
-            placeholderTextColor="#ccc"
-            value={cpf}
-            onChangeText={setCpf}
-            keyboardType="numeric"
-          />
-
-          <TextInput
-            style={styles.input}
-            placeholder="Email"
-            placeholderTextColor="#ccc"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-          />
-
-          <TextInput
-            style={styles.input}
-            placeholder="Telefone"
-            placeholderTextColor="#ccc"
-            value={telefone}
-            onChangeText={setTelefone}
-            keyboardType="phone-pad"
-          />
-
-          <TextInput
-            style={styles.input}
-            placeholder="Matrícula (RA)"
-            placeholderTextColor="#ccc"
-            value={matricula}
-            onChangeText={setMatricula}
-            keyboardType="numeric"
-          />
-
-          <TextInput
-            style={styles.input}
-            placeholder="Curso"
-            placeholderTextColor="#ccc"
-            value={curso}
-            onChangeText={setCurso}
-          />
-
-          <TextInput
-            style={styles.input}
-            placeholder="Senha"
-            placeholderTextColor="#ccc"
-            value={senha}
-            onChangeText={setSenha}
-            secureTextEntry
-          />
-
-          <TextInput
-            style={styles.input}
-            placeholder="Confirmar Senha"
-            placeholderTextColor="#ccc"
-            value={confirmarSenha}
-            onChangeText={setConfirmarSenha}
-            secureTextEntry
-          />
+          <TextInput style={styles.input} placeholder="Nome completo" placeholderTextColor="#ccc" value={nomeCompleto} onChangeText={setNomeCompleto} />
+          <TextInput style={styles.input} placeholder="CPF" placeholderTextColor="#ccc" value={cpf} onChangeText={setCpf} keyboardType="numeric" />
+          <TextInput style={styles.input} placeholder="Email" placeholderTextColor="#ccc" value={email} onChangeText={setEmail} keyboardType="email-address" />
+          <TextInput style={styles.input} placeholder="Telefone" placeholderTextColor="#ccc" value={telefone} onChangeText={setTelefone} keyboardType="phone-pad" />
+          <TextInput style={styles.input} placeholder="Matrícula (RA)" placeholderTextColor="#ccc" value={matricula} onChangeText={setMatricula} keyboardType="numeric" />
+          <TextInput style={styles.input} placeholder="Curso" placeholderTextColor="#ccc" value={curso} onChangeText={setCurso} />
+          <TextInput style={styles.input} placeholder="Senha" placeholderTextColor="#ccc" value={senha} onChangeText={setSenha} secureTextEntry />
+          <TextInput style={styles.input} placeholder="Confirmar Senha" placeholderTextColor="#ccc" value={confirmarSenha} onChangeText={setConfirmarSenha} secureTextEntry />
 
           <TouchableOpacity
             style={[styles.button, isLoading && styles.buttonDisabled]}
@@ -197,7 +165,6 @@ const CadastroScreen = () => {
               <Text style={styles.buttonText}>Cadastrar</Text>
             )}
           </TouchableOpacity>
-
         </SafeAreaView>
       </ScrollView>
     </KeyboardAvoidingView>
