@@ -1,6 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, SafeAreaView, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
-import { useNavigation } from '@react-navigation/native'; 
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  SafeAreaView,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  ActivityIndicator
+} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 const CadastroScreen = () => {
   const [nomeCompleto, setNomeCompleto] = useState('');
@@ -11,14 +23,14 @@ const CadastroScreen = () => {
   const [curso, setCurso] = useState('');
   const [senha, setSenha] = useState('');
   const [confirmarSenha, setConfirmarSenha] = useState('');
-  const [serverIp, setServerIp] = useState(''); // Para armazenar o IP do servidor
+  const [serverIp, setServerIp] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const navigation = useNavigation(); // Obtenha o objeto de navegação
+  const navigation = useNavigation();
 
-  // Função para cadastrar um usuário
   const handleCadastroUsuario = async () => {
     if (senha !== confirmarSenha) {
-      Alert.alert("Erro", "As senhas não coincidem!");
+      Alert.alert('Erro', 'As senhas não coincidem!');
       return;
     }
 
@@ -32,36 +44,48 @@ const CadastroScreen = () => {
       senha: senha,
     };
 
+    setIsLoading(true);
     try {
-      const response = await fetch(`http://172.16.15.23/api/cadastrar_usuario/`, {  // Ajuste na URL da requisição
+      const response = await fetch(`http://172.16.15.23/api/cadastrar_usuario/`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(dadosCadastro),
       });
 
       if (response.ok) {
-        const jsonResponse = await response.json();
-        Alert.alert("Sucesso", "Usuário cadastrado com sucesso!");
-        navigation.navigate('Home'); // Navegue para a tela Home
+        // mostra alerta com botão OK — só navega após usuário confirmar
+        Alert.alert(
+          'Sucesso',
+          'Usuário cadastrado com sucesso!',
+          [
+            {
+              text: 'OK',
+              onPress: () => {
+                // Se preferir voltar para a tela anterior use navigation.goBack()
+                navigation.navigate('Home'); 
+              },
+            },
+          ],
+          { cancelable: false }
+        );
       } else {
         console.error('Erro ao cadastrar usuário:', response.status);
-        Alert.alert("Erro", "Não foi possível cadastrar o usuário.");
+        Alert.alert('Erro', 'Não foi possível cadastrar o usuário.');
       }
     } catch (error) {
       console.error('Erro de conexão:', error);
-      Alert.alert("Erro", "Falha na conexão com o servidor.");
+      Alert.alert('Erro', 'Falha na conexão com o servidor.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // Buscar o IP do servidor
   useEffect(() => {
     const getPublicIp = async () => {
       try {
         const response = await fetch('https://api.ipify.org?format=json');
         const data = await response.json();
-        setServerIp(data.ip);  // Armazena o IP público da máquina
+        setServerIp(data.ip);
       } catch (error) {
         console.error(error);
       }
@@ -73,10 +97,23 @@ const CadastroScreen = () => {
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={80} // Ajuste para a posição do teclado
+      keyboardVerticalOffset={80}
     >
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <SafeAreaView style={styles.innerContainer}>
+
+          {/* Botão Voltar no topo */}
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => {
+              // Use navigate('Home') ou goBack() conforme sua navegação
+              navigation.navigate('Home');
+              // navigation.goBack();
+            }}
+          >
+            <Text style={styles.backText}>← Voltar</Text>
+          </TouchableOpacity>
+
           <Text style={styles.title}>VaiJunto?</Text>
 
           <TextInput
@@ -107,7 +144,7 @@ const CadastroScreen = () => {
 
           <TextInput
             style={styles.input}
-            placeholder="Telefone"     
+            placeholder="Telefone"
             placeholderTextColor="#ccc"
             value={telefone}
             onChangeText={setTelefone}
@@ -149,10 +186,18 @@ const CadastroScreen = () => {
             secureTextEntry
           />
 
-          <TouchableOpacity style={styles.button} onPress={handleCadastroUsuario}>
-            <Text style={styles.buttonText}>Cadastrar</Text>
+          <TouchableOpacity
+            style={[styles.button, isLoading && styles.buttonDisabled]}
+            onPress={handleCadastroUsuario}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Text style={styles.buttonText}>Cadastrar</Text>
+            )}
           </TouchableOpacity>
-          
+
         </SafeAreaView>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -162,11 +207,22 @@ const CadastroScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#12023d', // Azul escuro próximo do roxo
+    backgroundColor: '#12023d',
   },
   innerContainer: {
     flex: 1,
     padding: 16,
+  },
+  backButton: {
+    position: 'absolute',
+    left: 16,
+    top: Platform.OS === 'ios' ? 50 : 20,
+    zIndex: 10,
+    padding: 6,
+  },
+  backText: {
+    color: '#fff',
+    fontSize: 16,
   },
   title: {
     marginTop: 40,
@@ -174,7 +230,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 16,
     textAlign: 'center',
-    color: '#fff', // Cor branca para o texto
+    color: '#fff',
   },
   input: {
     fontSize: 18,
@@ -198,7 +254,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 20,
     width: 300,
-    alignSelf: 'center', 
+    alignSelf: 'center',
+  },
+  buttonDisabled: {
+    opacity: 0.7,
   },
   buttonText: {
     color: '#fff',
