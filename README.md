@@ -1,6 +1,44 @@
+## VaiJunto?
+
+Projeto da disciplina de programação de dispositivos móveis com ReactNative + Expo (Android)
+
+Orientador: Prof. Luiz Gustavo Turatti
+
+A solução compartilhada neste repositório consiste no desenvolvimento de uma plataforma para ...
+
+## Equipe do projeto
+2024 - João Victor Romagnoli
+
+202403000857 - Victor Felipe Pires
+
+2024 - Felipe do Santos
+
+## Sumario
+1 Requisitos
+2 Configuração de acesso aos dados
+3 Estrutura do projeto
+4 Instale os requisitos do projeto
+5 Executando o projeto
+6 Telas do projeto
+
+## 🔧 Requisitos:
+NodeJS se possível a versão mais recente
+
+React Native se possível a versão mais recente
+
+ExpoGo (link googlePlayStore: https://play.google.com/store/search?q=expo+go&c=apps) / (link applePlayStore: https://apps.apple.com/br/app/expo-go/id982107779)
+
+Banco de dados: Supabase.
+
+## 🗃️ Tabela 'usuários' com os seguintes campos:
 
 
-📦 Instale os requisitos do projeto:
+## 🔐 Configuração de acesso ao banco de dados
+DATABASE_URL=https://qcmlftwkovmajwtljauv.supabase.co
+DATABASE_KEY=chave_de_acesso: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjbWxmdHdrb3ZtYWp3dGxqYXV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA2MjQ0MzgsImV4cCI6MjA3NjIwMDQzOH0.pQUnYLfGgvTAQFXr5Y-d8-jsFHFNt3Eoknz1d3P6qQw
+
+
+## 📦 Instale os requisitos do projeto:
 # VaiJunto
 
 ## Descrição do Projeto
@@ -95,10 +133,10 @@ PS> choco install openjdk17 -y
 
 PS> choco install nvm -y
 
-🚀 Execute o projeto:
+ ## 🚀 Execute o projeto:
 npx expo start
 
-Telas do projeto
+## Telas do projeto
 Capture todas as telas do projeto e identifique-as
 
 Tela 1: login
