@@ -7,7 +7,7 @@ Orientador: Prof. Luiz Gustavo Turatti
 A solução compartilhada neste repositório consiste no desenvolvimento de uma plataforma para ...
 
 ## Equipe do projeto
-2024 - João Victor Romagnoli
+202402531425 - João Victor Romagnoli
 
 202403000857 - Victor Felipe Pires
 
