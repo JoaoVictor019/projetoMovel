@@ -1,4 +1,4 @@
-Projeto Móvel (Título do projeto)
+VaiJunto?
 Projeto da disciplina de programação de dispositivos móveis com ReactNative + Expo (Android)
 
 Orientador: Prof. Luiz Gustavo Turatti
