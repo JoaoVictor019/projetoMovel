@@ -1,3 +1,80 @@
+Projeto Móvel (Título do projeto)
+Projeto da disciplina de programação de dispositivos móveis com ReactNative + Expo (Android)
+
+Orientador: Prof. Luiz Gustavo Turatti
+
+A solução compartilhada neste repositório consiste no desenvolvimento de uma plataforma para ...
+
+Equipe do projeto
+2024 - João Victor Romagnoli Vendito 
+
+202403000857- Victor Felipe Pires
+
+Matrícula - Filipe do Santos
+
+Sumário
+1 Requisitos
+2 Configuração de acesso aos dados
+3 Estrutura do projeto
+4 Instale os requisitos do projeto
+5 Executando o projeto
+6 Telas do projeto
+
+Requisitos
+NodeJS se possível a versão mais recente
+
+React Native se possível a versão mais recente
+
+ExpoGo (link googlePlayStore) / (link applePlayStore)
+
+Banco de dados: Supabase.
+
+🗃️ Tabela 'usuários' com os seguintes campos:
+eu ia uuid: 96518379-e73e-4f70-b847-374483f95028
+timestamp: 11/11/2025 16:32:09
+Nome Completo
+E-mail
+Telefone
+é motorista
+CPF
+Matrícula
+Curso
+
+🔐 Configuração de acesso ao banco de dados
+DATABASE_URL=https://qcmlftwkovmajwtljauv.supabase.co
+DATABASE_KEY=chave_de_acesso: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjbWxmdHdrb3ZtYWp3dGxqYXV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA2MjQ0MzgsImV4cCI6MjA3NjIwMDQzOH0.pQUnYLfGgvTAQFXr5Y-d8-jsFHFNt3Eoknz1d3P6qQw
+
+📁 Estrutura do projeto:
+nomeDoProjeto/
+├── apresentacao
+│   ├── apresentacao.pdf
+│   └── apresentacao.pptx
+├── backend
+│   ├── src
+│   ├── .gitignore
+│   ├── readme.md
+│   └── ...demais arquivos
+├── documentacao
+│   ├── 01_cartaDeApresentacao.pdf
+│   ├── 02_cartaDeAutorizacao.pdf
+│   ├── 03_declaracaoDeUsoDeDadosPublicos.pdf
+│   ├── 04_roteiroDeExtensao.pdf
+│   └── documentacao.md
+├── frontend
+│   ├── assets
+│   ├── src
+│   ├── .gitignore
+│   ├── package.json
+│   ├── readme.md
+│   └── ...demais arquivos
+├── video
+│   ├── apresentacao.gif
+│   ├── apresentacao.mkv
+│   ├── apresentacao.mp4
+│   └── video.txt  O conteúdo deste arquivo deve ser o local público onde está o vídeo caso tenha mais de 10MB
+└── readme.md  Este arquivo é uma visão geral do projeto e não precisa ser idêntico a este arquivo
+
+📦 Instale os requisitos do projeto:
 # VaiJunto
 
 ## Descrição do Projeto
@@ -23,11 +100,12 @@ O **VaiJunto** é um aplicativo mobile desenvolvido para facilitar a conexão en
 
 ### Instalação do Node.js
 Para instalar o **Node.js**, siga o tutorial disponível no site oficial [Node.js](https://nodejs.org).
+Node.JS sempre a versão mais recente
+React Native sempre a versão mais recente
 
 ### Instalação do Expo CLI
 Após instalar o Node.js, instale o **Expo CLI** executando o seguinte comando no terminal:
 - **npm install -g expo-cli**
-
 
 ### Dependências do Projeto
 No diretório do projeto, execute o seguinte comando para instalar todas as dependências necessárias, como React Navigation e o Picker:
@@ -72,11 +150,40 @@ Isso abrirá o **Expo Dev Tools** no seu navegador. Com ele, você poderá execu
 - **Expo**: Uma plataforma para desenvolvimento de aplicativos em React Native, que facilita o processo de desenvolvimento, permitindo que você teste seu aplicativo diretamente em dispositivos móveis com o Expo Go.
 - **Node.js**: Uma plataforma que executa JavaScript no servidor, essencial para a instalação e gerenciamento de pacotes com o NPM (Node Package Manager) e para o desenvolvimento de projetos em React Native.
 
-Com essas instruções, você poderá instalar e configurar o ambiente de desenvolvimento do BlaBlaluno e rodar o aplicativo no Expo!
+Com essas instruções, você poderá instalar e configurar o ambiente de desenvolvimento do VaiJunto! e rodar o aplicativo no Expo!
 
+Instruções para instalação em um computador com Windows 11
 
+Caso não tenha o chocolate instalado, inicie o preparo do sistema abrindo um término do powershell com privilégio de administrador
 
+PS> Set-ExecutionPolicy AllSigned
 
+PS> Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+
+PS> choco --version
+Com o chocolate instalado, continuamos com a instalação dos requisitos do projeto
+
+PS> choco install nodejs-lts -y
+
+PS> choco install openjdk17 -y
+
+PS> choco install nvm -y
+
+🚀 Execute o projeto:
+npx expo start
+
+Telas do projeto
+Capture todas as telas do projeto e identifique-as
+
+Tela 1: login
+
+Tela 2: criação de usuário
+
+Tela 3: recuperação de senha
+
+Tela 4: tela inicial
+
+...e assim por diante
 
 
 
