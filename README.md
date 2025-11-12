@@ -35,6 +35,7 @@ Banco de dados: Supabase.
 
 ## 🔐 Configuração de acesso ao banco de dados
 DATABASE_URL=https://qcmlftwkovmajwtljauv.supabase.co
+
 DATABASE_KEY=chave_de_acesso: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjbWxmdHdrb3ZtYWp3dGxqYXV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA2MjQ0MzgsImV4cCI6MjA3NjIwMDQzOH0.pQUnYLfGgvTAQFXr5Y-d8-jsFHFNt3Eoknz1d3P6qQw
 
 ## Descrição do Projeto
