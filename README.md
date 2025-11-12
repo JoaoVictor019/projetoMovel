@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-
-
-📦 Instale os requisitos do projeto:
-=======
 ## VaiJunto?
 
 Projeto da disciplina de programação de dispositivos móveis com ReactNative + Expo (Android)
@@ -41,11 +36,6 @@ Banco de dados: Supabase.
 ## 🔐 Configuração de acesso ao banco de dados
 DATABASE_URL=https://qcmlftwkovmajwtljauv.supabase.co
 DATABASE_KEY=chave_de_acesso: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjbWxmdHdrb3ZtYWp3dGxqYXV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA2MjQ0MzgsImV4cCI6MjA3NjIwMDQzOH0.pQUnYLfGgvTAQFXr5Y-d8-jsFHFNt3Eoknz1d3P6qQw
-
-
-## 📦 Instale os requisitos do projeto:
->>>>>>> 89feff8f4aa770eb83877dd0b941a04a0a36096b
-# VaiJunto
 
 ## Descrição do Projeto
 O **VaiJunto** é um aplicativo mobile desenvolvido para facilitar a conexão entre estudantes universitários que desejam compartilhar caronas. A ideia central do projeto é permitir que os usuários ofereçam ou encontrem caronas de maneira prática e segura, economizando tempo e recursos. Com o app, os estudantes podem buscar caronas disponíveis, oferecer vagas em seus veículos e se conectar com outros colegas que seguem rotas semelhantes.
@@ -104,8 +94,6 @@ No diretório 'django_backend', siga os passos:
 
 - Com o ambiente virtual ativado, rode **pip install -r requirements.txt**
 
-
-
 ### Rodando o Projeto
 Após instalar todas as dependências, você pode iniciar o projeto com o comando:
 - **npm start**
@@ -139,12 +127,6 @@ PS> choco install openjdk17 -y
 
 PS> choco install nvm -y
 
-<<<<<<< HEAD
-🚀 Execute o projeto:
-npx expo start
-
-Telas do projeto
-=======
  ## 🚀 Execute o projeto:
 npx expo start
 
