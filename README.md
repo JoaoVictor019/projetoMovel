@@ -1,9 +1,3 @@
-<<<<<<< HEAD
-=======
-
-📦 Instale os requisitos do projeto:
-=======
->>>>>>> 997c18f (Atualiza README e ajustes locais)
 ## VaiJunto?
 
 Projeto da disciplina de programação de dispositivos móveis com ReactNative + Expo (Android)
@@ -44,10 +38,8 @@ DATABASE_URL=https://qcmlftwkovmajwtljauv.supabase.co
 
 DATABASE_KEY=chave_de_acesso: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjbWxmdHdrb3ZtYWp3dGxqYXV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA2MjQ0MzgsImV4cCI6MjA3NjIwMDQzOH0.pQUnYLfGgvTAQFXr5Y-d8-jsFHFNt3Eoknz1d3P6qQw
 
-=======
 
 ## 📦 Instale os requisitos do projeto:
-# VaiJunto
 
 ## Descrição do Projeto
 O **VaiJunto** é um aplicativo mobile desenvolvido para facilitar a conexão entre estudantes universitários que desejam compartilhar caronas. A ideia central do projeto é permitir que os usuários ofereçam ou encontrem caronas de maneira prática e segura, economizando tempo e recursos. Com o app, os estudantes podem buscar caronas disponíveis, oferecer vagas em seus veículos e se conectar com outros colegas que seguem rotas semelhantes.
@@ -143,7 +135,6 @@ PS> choco install nvm -y
 npx expo start
 
 ## Telas do projeto
->>>>>>> 89feff8f4aa770eb83877dd0b941a04a0a36096b
 Capture todas as telas do projeto e identifique-as
 
 Tela 1: login
@@ -154,7 +145,7 @@ Tela 3: recuperação de senha
 
 Tela 4: tela inicial
 
-...e assim por diante
+e assim por diante...
 
 
 
