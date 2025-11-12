@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -11,7 +10,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  ActivityIndicator
+  ActivityIndicator,
+  Modal,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
@@ -26,6 +26,9 @@ const CadastroScreen = () => {
   const [confirmarSenha, setConfirmarSenha] = useState('');
   const [serverIp, setServerIp] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  const [successVisible, setSuccessVisible] = useState(false);
+  const [successMsg, setSuccessMsg] = useState('Cadastro realizado com sucesso!');
 
   const navigation = useNavigation();
 
@@ -63,53 +66,123 @@ const CadastroScreen = () => {
     return true;
   };
 
+  const limparFormulario = () => {
+    setNomeCompleto('');
+    setCpf('');
+    setEmail('');
+    setTelefone('');
+    setMatricula('');
+    setCurso('');
+    setSenha('');
+    setConfirmarSenha('');
+  };
+
   const handleCadastroUsuario = async () => {
-    if (!validarCampos()) return;
+    console.log('[CADASTRO] Botão clicado!');
+    console.log('[CADASTRO] Campos preenchidos:', {
+      nomeCompleto: nomeCompleto ? 'preenchido' : 'vazio',
+      cpf: cpf ? 'preenchido' : 'vazio',
+      email: email ? 'preenchido' : 'vazio',
+      telefone: telefone ? 'preenchido' : 'vazio',
+      matricula: matricula ? 'preenchido' : 'vazio',
+      curso: curso ? 'preenchido' : 'vazio',
+      senha: senha ? 'preenchido' : 'vazio',
+      confirmarSenha: confirmarSenha ? 'preenchido' : 'vazio',
+    });
+
+    if (!validarCampos()) {
+      console.log('[CADASTRO] Validação falhou');
+      return;
+    }
+
+    console.log('[CADASTRO] Validação passou, iniciando cadastro...');
 
     const dadosCadastro = {
       nome: nomeCompleto,
-      cpf: cpf,
-      email: email,
-      telefone: telefone,
-      matricula: matricula,
-      curso: curso,
-      senha: senha,
+      cpf,
+      email,
+      telefone,
+      matricula,
+      curso,
+      senha,
     };
 
     setIsLoading(true);
+    console.log('[CADASTRO] Loading ativado');
+
+    // Detecta se está rodando na web e ajusta o IP
+    // Na web, geralmente precisa usar localhost ou o IP da máquina
+    const isWeb = Platform.OS === 'web';
+    const BASE_URL = isWeb ? 'http://localhost:8081' : 'http://172.16.15.23';
+    const url = `${BASE_URL}/api/cadastrar_usuario/`;
+    
+    console.log('[CADASTRO] Tentando conectar em:', url);
+
     try {
-      const response = await fetch(`http://172.16.15.23/api/cadastrar_usuario/`, {
+      const resp = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(dadosCadastro),
       });
 
-      const responseText = await response.text();
-      console.log('Status da resposta:', response.status);
-      console.log('Corpo da resposta:', responseText);
+      // lê corpo (pode ser texto ou JSON)
+      let bodyText = '';
+      let bodyJson = null;
+      try {
+        bodyText = await resp.text();
+        try { bodyJson = bodyText ? JSON.parse(bodyText) : null; } catch (e) {}
+      } catch (e) {}
 
-      if (response.ok) {
-        Alert.alert(
-          'Sucesso',
-          'Usuário cadastrado com sucesso!',
-          [
-            {
-              text: 'OK',
-              onPress: () => {
-                setTimeout(() => {
-                  navigation.navigate('Home');
-                }, 100);
-              },
-            },
-          ],
-          { cancelable: false }
-        );
-      } else {
-        Alert.alert('Erro', 'Não foi possível cadastrar o usuário.');
+      console.log('[CADASTRO] status:', resp.status);
+      console.log('[CADASTRO] ok:', resp.ok);
+      console.log('[CADASTRO] bodyText:', bodyText);
+
+      // sucesso para QUALQUER 2xx
+      const sucesso = resp.status >= 200 && resp.status < 300;
+
+      if (sucesso) {
+        console.log('[CADASTRO] Sucesso! Mostrando mensagem...');
+        setSuccessMsg('Cadastro realizado com sucesso!');
+        setSuccessVisible(true);
+        limparFormulario();
+
+        // Mostra Alert como garantia
+        Alert.alert('Sucesso!', 'Cadastro realizado com sucesso!', [
+          {
+            text: 'OK',
+            onPress: () => {
+              setSuccessVisible(false);
+              navigation.navigate('Home');
+            }
+          }
+        ]);
+
+        // espera o usuário ver o modal e navega (aumentado para 3 segundos)
+        setTimeout(() => {
+          setSuccessVisible(false);
+          navigation.navigate('Home');
+        }, 3000);
+        return;
       }
-    } catch (error) {
-      console.error('Erro de conexão:', error);
-      Alert.alert('Erro', 'Falha na conexão com o servidor.');
+
+      // se deu erro, tenta mensagem amigável do backend
+      const erroMsg =
+        (bodyJson && (bodyJson.detail || bodyJson.message || bodyJson.error)) ||
+        bodyText ||
+        'Não foi possível cadastrar o usuário.';
+      console.log('[CADASTRO] Erro:', erroMsg);
+      Alert.alert('Erro', String(erroMsg));
+    } catch (err) {
+      console.log('[CADASTRO] network error:', err && err.message ? err.message : err);
+      const errorMessage = err && err.message ? err.message : 'Erro desconhecido';
+      
+      let mensagemErro = 'Falha na conexão com o servidor.';
+      
+      if (errorMessage.includes('Failed to fetch') || errorMessage.includes('ERR_CONNECTION_TIMED_OUT')) {
+        mensagemErro = `Não foi possível conectar ao servidor em ${BASE_URL}.\n\nVerifique se:\n- O servidor backend está rodando\n- O IP/porta está correto\n- Não há firewall bloqueando a conexão`;
+      }
+      
+      Alert.alert('Erro de Conexão', mensagemErro);
     } finally {
       setIsLoading(false);
     }
@@ -147,7 +220,7 @@ const CadastroScreen = () => {
 
           <TextInput style={styles.input} placeholder="Nome completo" placeholderTextColor="#ccc" value={nomeCompleto} onChangeText={setNomeCompleto} />
           <TextInput style={styles.input} placeholder="CPF" placeholderTextColor="#ccc" value={cpf} onChangeText={setCpf} keyboardType="numeric" />
-          <TextInput style={styles.input} placeholder="Email" placeholderTextColor="#ccc" value={email} onChangeText={setEmail} keyboardType="email-address" />
+          <TextInput style={styles.input} placeholder="Email" placeholderTextColor="#ccc" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
           <TextInput style={styles.input} placeholder="Telefone" placeholderTextColor="#ccc" value={telefone} onChangeText={setTelefone} keyboardType="phone-pad" />
           <TextInput style={styles.input} placeholder="Matrícula (RA)" placeholderTextColor="#ccc" value={matricula} onChangeText={setMatricula} keyboardType="numeric" />
           <TextInput style={styles.input} placeholder="Curso" placeholderTextColor="#ccc" value={curso} onChangeText={setCurso} />
@@ -156,8 +229,15 @@ const CadastroScreen = () => {
 
           <TouchableOpacity
             style={[styles.button, isLoading && styles.buttonDisabled]}
-            onPress={handleCadastroUsuario}
+            onPress={() => {
+              console.log('[CADASTRO] onPress do botão chamado');
+              handleCadastroUsuario().catch(err => {
+                console.error('[CADASTRO] Erro não tratado:', err);
+                Alert.alert('Erro', 'Ocorreu um erro inesperado. Verifique o console.');
+              });
+            }}
             disabled={isLoading}
+            activeOpacity={0.7}
           >
             {isLoading ? (
               <ActivityIndicator size="small" color="#fff" />
@@ -165,6 +245,22 @@ const CadastroScreen = () => {
               <Text style={styles.buttonText}>Cadastrar</Text>
             )}
           </TouchableOpacity>
+
+          {/* Modal de sucesso */}
+          <Modal
+            visible={successVisible}
+            transparent
+            animationType="fade"
+            onRequestClose={() => setSuccessVisible(false)}
+          >
+            <View style={styles.modalBackdrop}>
+              <View style={styles.modalCard}>
+                <Text style={styles.modalIcon}>✔</Text>
+                <Text style={styles.modalTitle}>Cadastro realizado!</Text>
+                <Text style={styles.modalText}>{successMsg}</Text>
+              </View>
+            </View>
+          </Modal>
         </SafeAreaView>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -172,65 +268,33 @@ const CadastroScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#12023d',
-  },
-  innerContainer: {
-    flex: 1,
-    padding: 16,
-  },
-  backButton: {
-    position: 'absolute',
-    left: 16,
-    top: Platform.OS === 'ios' ? 50 : 20,
-    zIndex: 10,
-    padding: 6,
-  },
-  backText: {
-    color: '#fff',
-    fontSize: 16,
-  },
-  title: {
-    marginTop: 40,
-    fontSize: 48,
-    fontWeight: 'bold',
-    marginBottom: 16,
-    textAlign: 'center',
-    color: '#fff',
-  },
+  container: { flex: 1, backgroundColor: '#12023d' },
+  innerContainer: { flex: 1, padding: 16 },
+  backButton: { position: 'absolute', left: 16, top: Platform.OS === 'ios' ? 50 : 20, zIndex: 10, padding: 6 },
+  backText: { color: '#fff', fontSize: 16 },
+  title: { marginTop: 40, fontSize: 48, fontWeight: 'bold', marginBottom: 16, textAlign: 'center', color: '#fff' },
   input: {
-    fontSize: 18,
-    textAlign: 'center',
-    color: '#fff',
-    margin: 10,
-    height: 50,
-    borderColor: '#4f0466',
-    borderWidth: 4,
-    marginBottom: 12,
-    paddingHorizontal: 10,
-    borderRadius: 24,
-    fontWeight: 'bold',
+    fontSize: 18, textAlign: 'center', color: '#fff',
+    margin: 10, height: 50, borderColor: '#4f0466', borderWidth: 4,
+    marginBottom: 12, paddingHorizontal: 10, borderRadius: 24, fontWeight: 'bold',
   },
   button: {
-    backgroundColor: '#ff4800',
-    borderWidth: 2,
-    borderRadius: 24,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    alignItems: 'center',
-    marginTop: 20,
-    width: 300,
-    alignSelf: 'center',
+    backgroundColor: '#ff4800', borderWidth: 2, borderRadius: 24, paddingVertical: 10,
+    paddingHorizontal: 20, alignItems: 'center', marginTop: 20, width: 300, alignSelf: 'center',
   },
-  buttonDisabled: {
-    opacity: 0.7,
+  buttonDisabled: { opacity: 0.7 },
+  buttonText: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
+
+  // Modal
+  modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)', alignItems: 'center', justifyContent: 'center' },
+  modalCard: {
+    width: '80%', backgroundColor: '#1c0a4d', borderRadius: 20,
+    paddingVertical: 24, paddingHorizontal: 16, alignItems: 'center',
+    borderWidth: 2, borderColor: '#4f0466',
   },
-  buttonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
+  modalIcon: { fontSize: 40, color: '#32d74b', marginBottom: 8 },
+  modalTitle: { fontSize: 20, fontWeight: 'bold', color: '#fff', marginBottom: 6 },
+  modalText: { fontSize: 14, color: '#ddd', textAlign: 'center' },
 });
 
 export default CadastroScreen;
