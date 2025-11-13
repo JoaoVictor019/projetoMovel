@@ -1,300 +1,282 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
-  View,
+  StyleSheet,
   Text,
+  View,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
-  Alert,
   SafeAreaView,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Alert,
   ActivityIndicator,
-  Modal,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { StatusBar } from 'expo-status-bar';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import supabase from '../services/supabase';
 
-const CadastroScreen = () => {
-  const [nomeCompleto, setNomeCompleto] = useState('');
+export default function CadastroScreen({ navigation }) {
+  const [nome, setNome] = useState('');
   const [cpf, setCpf] = useState('');
   const [email, setEmail] = useState('');
   const [telefone, setTelefone] = useState('');
   const [matricula, setMatricula] = useState('');
   const [curso, setCurso] = useState('');
   const [senha, setSenha] = useState('');
-  const [confirmarSenha, setConfirmarSenha] = useState('');
-  const [serverIp, setServerIp] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const [successVisible, setSuccessVisible] = useState(false);
-  const [successMsg, setSuccessMsg] = useState('Cadastro realizado com sucesso!');
-
-  const navigation = useNavigation();
-
-  const validarCampos = () => {
-    if (
-      !nomeCompleto.trim() ||
-      !cpf.trim() ||
-      !email.trim() ||
-      !telefone.trim() ||
-      !matricula.trim() ||
-      !curso.trim() ||
-      !senha.trim() ||
-      !confirmarSenha.trim()
-    ) {
-      Alert.alert('Atenção', 'Por favor, preencha todos os campos.');
-      return false;
-    }
-
-    if (cpf.length !== 11 || !/^\d+$/.test(cpf)) {
-      Alert.alert('Atenção', 'CPF inválido. Deve conter 11 dígitos numéricos.');
-      return false;
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      Alert.alert('Atenção', 'E-mail inválido.');
-      return false;
-    }
-
-    if (senha !== confirmarSenha) {
-      Alert.alert('Erro', 'As senhas não coincidem!');
-      return false;
-    }
-
-    return true;
-  };
-
-  const limparFormulario = () => {
-    setNomeCompleto('');
-    setCpf('');
-    setEmail('');
-    setTelefone('');
-    setMatricula('');
-    setCurso('');
-    setSenha('');
-    setConfirmarSenha('');
-  };
-
-  const handleCadastroUsuario = async () => {
-    console.log('[CADASTRO] Botão clicado!');
-    console.log('[CADASTRO] Campos preenchidos:', {
-      nomeCompleto: nomeCompleto ? 'preenchido' : 'vazio',
-      cpf: cpf ? 'preenchido' : 'vazio',
-      email: email ? 'preenchido' : 'vazio',
-      telefone: telefone ? 'preenchido' : 'vazio',
-      matricula: matricula ? 'preenchido' : 'vazio',
-      curso: curso ? 'preenchido' : 'vazio',
-      senha: senha ? 'preenchido' : 'vazio',
-      confirmarSenha: confirmarSenha ? 'preenchido' : 'vazio',
-    });
-
-    if (!validarCampos()) {
-      console.log('[CADASTRO] Validação falhou');
+  const handleCadastro = async () => {
+    // Validação básica
+    if (!nome || !cpf || !email || !matricula || !curso || !senha) {
+      Alert.alert('Erro', 'Por favor, preencha todos os campos obrigatórios.');
       return;
     }
 
-    console.log('[CADASTRO] Validação passou, iniciando cadastro...');
+    if (senha.length < 6) {
+      Alert.alert('Erro', 'A senha deve ter pelo menos 6 caracteres.');
+      return;
+    }
 
-    const dadosCadastro = {
-      nome: nomeCompleto,
-      cpf,
-      email,
-      telefone,
-      matricula,
-      curso,
-      senha,
-    };
-
-    setIsLoading(true);
-    console.log('[CADASTRO] Loading ativado');
-
-    // Detecta se está rodando na web e ajusta o IP
-    // Na web, geralmente precisa usar localhost ou o IP da máquina
-    const isWeb = Platform.OS === 'web';
-    const BASE_URL = isWeb ? 'http://localhost:8081' : 'http://172.16.15.23';
-    const url = `${BASE_URL}/api/cadastrar_usuario/`;
-    
-    console.log('[CADASTRO] Tentando conectar em:', url);
+    setLoading(true);
 
     try {
-      const resp = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dadosCadastro),
+      // Criar usuário no Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: email.trim(),
+        password: senha,
       });
 
-      // lê corpo (pode ser texto ou JSON)
-      let bodyText = '';
-      let bodyJson = null;
-      try {
-        bodyText = await resp.text();
-        try { bodyJson = bodyText ? JSON.parse(bodyText) : null; } catch (e) {}
-      } catch (e) {}
-
-      console.log('[CADASTRO] status:', resp.status);
-      console.log('[CADASTRO] ok:', resp.ok);
-      console.log('[CADASTRO] bodyText:', bodyText);
-
-      // sucesso para QUALQUER 2xx
-      const sucesso = resp.status >= 200 && resp.status < 300;
-
-      if (sucesso) {
-        console.log('[CADASTRO] Sucesso! Mostrando mensagem...');
-        setSuccessMsg('Cadastro realizado com sucesso!');
-        setSuccessVisible(true);
-        limparFormulario();
-
-        // Mostra Alert como garantia
-        Alert.alert('Sucesso!', 'Cadastro realizado com sucesso!', [
-          {
-            text: 'OK',
-            onPress: () => {
-              setSuccessVisible(false);
-              navigation.navigate('Home');
-            }
-          }
-        ]);
-
-        // espera o usuário ver o modal e navega (aumentado para 3 segundos)
-        setTimeout(() => {
-          setSuccessVisible(false);
-          navigation.navigate('Home');
-        }, 3000);
+      if (authError) {
+        Alert.alert('Erro no Cadastro', authError.message);
+        setLoading(false);
         return;
       }
 
-      // se deu erro, tenta mensagem amigável do backend
-      const erroMsg =
-        (bodyJson && (bodyJson.detail || bodyJson.message || bodyJson.error)) ||
-        bodyText ||
-        'Não foi possível cadastrar o usuário.';
-      console.log('[CADASTRO] Erro:', erroMsg);
-      Alert.alert('Erro', String(erroMsg));
-    } catch (err) {
-      console.log('[CADASTRO] network error:', err && err.message ? err.message : err);
-      const errorMessage = err && err.message ? err.message : 'Erro desconhecido';
-      
-      let mensagemErro = 'Falha na conexão com o servidor.';
-      
-      if (errorMessage.includes('Failed to fetch') || errorMessage.includes('ERR_CONNECTION_TIMED_OUT')) {
-        mensagemErro = `Não foi possível conectar ao servidor em ${BASE_URL}.\n\nVerifique se:\n- O servidor backend está rodando\n- O IP/porta está correto\n- Não há firewall bloqueando a conexão`;
+      if (authData.user) {
+        // Salvar dados do perfil no Supabase
+        const { error: profileError } = await supabase
+          .from('usuarios')
+          .insert([
+            {
+              id: authData.user.id,
+              nome_completo: nome,
+              cpf: cpf,
+              email: email.trim(),
+              telefone: telefone || '',
+              matricula: matricula,
+              curso: curso,
+            },
+          ]);
+
+        if (profileError) {
+          console.error('Erro ao salvar perfil:', profileError);
+          // Mesmo com erro no perfil, o usuário foi criado no auth
+        }
+
+        // Salvar dados do perfil localmente também
+        const perfil = {
+          nome,
+          cpf,
+          email: email.trim(),
+          telefone: telefone || '',
+          matricula,
+          curso,
+        };
+        
+        await AsyncStorage.setItem('perfil', JSON.stringify(perfil));
+        
+        // Resetar loading antes de mostrar alerta
+        setLoading(false);
+        
+        // Mostrar alerta de sucesso e navegar
+        Alert.alert(
+          'Sucesso!',
+          'Conta criada com sucesso!',
+          [
+            {
+              text: 'OK',
+              onPress: () => {
+                navigation.replace('Login');
+              },
+            },
+          ]
+        );
+      } else {
+        setLoading(false);
       }
-      
-      Alert.alert('Erro de Conexão', mensagemErro);
-    } finally {
-      setIsLoading(false);
+    } catch (error) {
+      console.error('Erro no cadastro:', error);
+      setLoading(false);
+      Alert.alert('Erro', 'Não foi possível criar a conta. Tente novamente.');
     }
   };
 
-  useEffect(() => {
-    const getPublicIp = async () => {
-      try {
-        const response = await fetch('https://api.ipify.org?format=json');
-        const data = await response.json();
-        setServerIp(data.ip);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    getPublicIp();
-  }, []);
-
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={80}
-    >
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <SafeAreaView style={styles.innerContainer}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => navigation.navigate('Home')}
-          >
-            <Text style={styles.backText}>← Voltar</Text>
-          </TouchableOpacity>
-
-          <Text style={styles.title}>VaiJunto?</Text>
-
-          <TextInput style={styles.input} placeholder="Nome completo" placeholderTextColor="#ccc" value={nomeCompleto} onChangeText={setNomeCompleto} />
-          <TextInput style={styles.input} placeholder="CPF" placeholderTextColor="#ccc" value={cpf} onChangeText={setCpf} keyboardType="numeric" />
-          <TextInput style={styles.input} placeholder="Email" placeholderTextColor="#ccc" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
-          <TextInput style={styles.input} placeholder="Telefone" placeholderTextColor="#ccc" value={telefone} onChangeText={setTelefone} keyboardType="phone-pad" />
-          <TextInput style={styles.input} placeholder="Matrícula (RA)" placeholderTextColor="#ccc" value={matricula} onChangeText={setMatricula} keyboardType="numeric" />
-          <TextInput style={styles.input} placeholder="Curso" placeholderTextColor="#ccc" value={curso} onChangeText={setCurso} />
-          <TextInput style={styles.input} placeholder="Senha" placeholderTextColor="#ccc" value={senha} onChangeText={setSenha} secureTextEntry />
-          <TextInput style={styles.input} placeholder="Confirmar Senha" placeholderTextColor="#ccc" value={confirmarSenha} onChangeText={setConfirmarSenha} secureTextEntry />
-
-          <TouchableOpacity
-            style={[styles.button, isLoading && styles.buttonDisabled]}
-            onPress={() => {
-              console.log('[CADASTRO] onPress do botão chamado');
-              handleCadastroUsuario().catch(err => {
-                console.error('[CADASTRO] Erro não tratado:', err);
-                Alert.alert('Erro', 'Ocorreu um erro inesperado. Verifique o console.');
-              });
-            }}
-            disabled={isLoading}
-            activeOpacity={0.7}
-          >
-            {isLoading ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <Text style={styles.buttonText}>Cadastrar</Text>
-            )}
-          </TouchableOpacity>
-
-          {/* Modal de sucesso */}
-          <Modal
-            visible={successVisible}
-            transparent
-            animationType="fade"
-            onRequestClose={() => setSuccessVisible(false)}
-          >
-            <View style={styles.modalBackdrop}>
-              <View style={styles.modalCard}>
-                <Text style={styles.modalIcon}>✔</Text>
-                <Text style={styles.modalTitle}>Cadastro realizado!</Text>
-                <Text style={styles.modalText}>{successMsg}</Text>
-              </View>
+    <SafeAreaView style={styles.container}>
+      <StatusBar style="light" />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardView}
+      >
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <View style={styles.content}>
+            <View style={styles.header}>
+              <Text style={styles.logo}>VaiJunto</Text>
+              <Text style={styles.subtitle}>Crie sua conta</Text>
             </View>
-          </Modal>
-        </SafeAreaView>
-      </ScrollView>
-    </KeyboardAvoidingView>
+
+            <View style={styles.form}>
+              <TextInput
+                style={styles.input}
+                placeholder="Nome Completo"
+                placeholderTextColor="#999"
+                value={nome}
+                onChangeText={setNome}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="CPF"
+                placeholderTextColor="#999"
+                value={cpf}
+                onChangeText={setCpf}
+                keyboardType="numeric"
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Email"
+                placeholderTextColor="#999"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Telefone"
+                placeholderTextColor="#999"
+                value={telefone}
+                onChangeText={setTelefone}
+                keyboardType="phone-pad"
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Matrícula"
+                placeholderTextColor="#999"
+                value={matricula}
+                onChangeText={setMatricula}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Curso"
+                placeholderTextColor="#999"
+                value={curso}
+                onChangeText={setCurso}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Senha"
+                placeholderTextColor="#999"
+                value={senha}
+                onChangeText={setSenha}
+                secureTextEntry
+              />
+
+              <TouchableOpacity
+                style={[styles.button, loading && styles.buttonDisabled]}
+                onPress={handleCadastro}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#FFF" />
+                ) : (
+                  <Text style={styles.buttonText}>Cadastrar</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.footer}>
+              <Text style={styles.footerText}>Já tem uma conta? </Text>
+              <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+                <Text style={styles.footerLink}>Entrar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#12023d' },
-  innerContainer: { flex: 1, padding: 16 },
-  backButton: { position: 'absolute', left: 16, top: Platform.OS === 'ios' ? 50 : 20, zIndex: 10, padding: 6 },
-  backText: { color: '#fff', fontSize: 16 },
-  title: { marginTop: 40, fontSize: 48, fontWeight: 'bold', marginBottom: 16, textAlign: 'center', color: '#fff' },
+  container: {
+    flex: 1,
+    backgroundColor: '#6B46C1',
+  },
+  keyboardView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  content: {
+    flex: 1,
+    justifyContent: 'center',
+    padding: 20,
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: 30,
+  },
+  logo: {
+    fontSize: 48,
+    fontWeight: 'bold',
+    color: '#FFF',
+    marginBottom: 10,
+  },
+  subtitle: {
+    fontSize: 18,
+    color: '#E9D5FF',
+  },
+  form: {
+    width: '100%',
+  },
   input: {
-    fontSize: 18, textAlign: 'center', color: '#fff',
-    margin: 10, height: 50, borderColor: '#4f0466', borderWidth: 4,
-    marginBottom: 12, paddingHorizontal: 10, borderRadius: 24, fontWeight: 'bold',
+    backgroundColor: '#FFF',
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 15,
+    fontSize: 16,
+    color: '#333',
   },
   button: {
-    backgroundColor: '#ff4800', borderWidth: 2, borderRadius: 24, paddingVertical: 10,
-    paddingHorizontal: 20, alignItems: 'center', marginTop: 20, width: 300, alignSelf: 'center',
+    backgroundColor: '#F97316',
+    borderRadius: 10,
+    padding: 18,
+    alignItems: 'center',
+    marginTop: 10,
   },
-  buttonDisabled: { opacity: 0.7 },
-  buttonText: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
-
-  // Modal
-  modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)', alignItems: 'center', justifyContent: 'center' },
-  modalCard: {
-    width: '80%', backgroundColor: '#1c0a4d', borderRadius: 20,
-    paddingVertical: 24, paddingHorizontal: 16, alignItems: 'center',
-    borderWidth: 2, borderColor: '#4f0466',
+  buttonText: {
+    color: '#FFF',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
-  modalIcon: { fontSize: 40, color: '#32d74b', marginBottom: 8 },
-  modalTitle: { fontSize: 20, fontWeight: 'bold', color: '#fff', marginBottom: 6 },
-  modalText: { fontSize: 14, color: '#ddd', textAlign: 'center' },
+  buttonDisabled: {
+    opacity: 0.6,
+  },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 20,
+  },
+  footerText: {
+    color: '#E9D5FF',
+    fontSize: 14,
+  },
+  footerLink: {
+    color: '#F97316',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
 });
 
-export default CadastroScreen;
