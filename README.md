@@ -31,6 +31,10 @@ ExpoGo (link googlePlayStore: https://play.google.com/store/search?q=expo+go&c=a
 Banco de dados: Supabase.
 
 ## 🗃️ Tabela 'usuários' com os seguintes campos:
+<img width="1209" height="157" alt="image" src="https://github.com/user-attachments/assets/beebcc71-67ec-43ec-a2b4-98c2196e3a18" />
+<img width="1139" height="118" alt="image" src="https://github.com/user-attachments/assets/f60efd90-a2e8-46b9-ba4e-82eb8be08cf8" />
+<img width="1114" height="122" alt="image" src="https://github.com/user-attachments/assets/3a94dc6d-b79f-4c55-b47f-6024a4311fc9" />
+
 
 
 ## 🔐 Configuração de acesso ao banco de dados
