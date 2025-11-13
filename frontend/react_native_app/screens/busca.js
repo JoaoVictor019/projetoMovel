@@ -1,307 +1,187 @@
 import React, { useState } from 'react';
-import { useNavigation } from '@react-navigation/native';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, KeyboardAvoidingView, Platform, ScrollView, Modal, FlatList } from 'react-native';
-import { Calendar } from 'react-native-calendars';
-import moment from 'moment'; // Importa a biblioteca moment.js para formatação de data
-import RNPickerSelect from 'react-native-picker-select'; // Importa a biblioteca RNPickerSelect
+import {
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  TouchableOpacity,
+  SafeAreaView,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 
-const BuscarCarona = () => {
-  const navigation = useNavigation();
-
-  const [localizacaoAtual, setLocalizacaoAtual] = useState('');
+export default function BuscarCaronaScreen({ navigation }) {
+  const [origem, setOrigem] = useState('');
   const [destino, setDestino] = useState('');
   const [data, setData] = useState('');
   const [horario, setHorario] = useState('');
-  const [vagasDisponiveis, setVagasDisponiveis] = useState('');
-  const [isModalVisible, setModalVisible] = useState(false);
-  const [isCalendarVisible, setCalendarVisible] = useState(false);
-  const [isPickerVisible, setPickerVisible] = useState(false);
-
-  const options = ['1 pessoa', '2 pessoas', '3 pessoas', '4 pessoas'];
-
-  const horarioOptions = [
-    { label: '08:00', value: '08:00' },
-    { label: '09:00', value: '09:00' },
-    { label: '10:00', value: '10:00' },
-    { label: '11:00', value: '11:00' },
-    { label: '12:00', value: '12:00' },
-    { label: '13:00', value: '13:00' },
-    { label: '14:00', value: '14:00' },
-    { label: '15:00', value: '15:00' },
-    { label: '16:00', value: '16:00' },
-    { label: '17:00', value: '17:00' },
-    { label: '18:00', value: '18:00' },
-    { label: '19:00', value: '19:00' },
-    { label: '20:00', value: '20:00' },
-    { label: '21:00', value: '21:00' },
-    { label: '22:00', value: '22:00' },
-  ];
 
   const handleBuscar = () => {
-    // Lógica para buscar carona
+    // Lógica de busca de carona aqui
+    console.log('Buscar carona:', { origem, destino, data, horario });
+    // Navegar para resultados ou mostrar lista
   };
-
-  const toggleModal = () => {
-    setModalVisible(!isModalVisible);
-  }; //Para seleção de vagas
-
-  const toggleCalendar = () => {
-    setCalendarVisible(!isCalendarVisible);
-  }; //Para o calendário
-
-  const togglePicker = () => {
-    setPickerVisible(!isPickerVisible);
-  }; //Para seleção de horário
-
-  const handleOptionSelect = (option) => {
-    setVagasDisponiveis(option);
-    toggleModal();
-  };
-
-  const handleDateSelect = (day) => {
-    const formattedDate = moment(day.dateString).format('DD/MM/YYYY');
-    setData(formattedDate);
-    toggleCalendar();
-  };
-
-  const handleHorarioSelect = (value) => {
-    setHorario(value);
-    togglePicker();
-  };
-
-  const today = moment().format('YYYY-MM-DD'); // Formato 'YYYY-MM-DD'
-
-  
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={80}
-    >
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <SafeAreaView style={styles.innerContainer}>
-          <Text style={styles.title}>Buscar carona</Text>
+    <SafeAreaView style={styles.container}>
+      <StatusBar style="light" />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardView}
+      >
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <View style={styles.content}>
+            <View style={styles.header}>
+              <Text style={styles.title}>Buscar Carona</Text>
+              <Text style={styles.subtitle}>Encontre caronas disponíveis</Text>
+            </View>
 
-          <TextInput
-            style={styles.input}
-            placeholder="Localização atual"
-            placeholderTextColor="#ccc"
-            value={localizacaoAtual}
-            onChangeText={setLocalizacaoAtual}
-          />
-          
-          <TextInput
-            style={styles.input}
-            placeholder="Destino"
-            placeholderTextColor="#ccc"
-            value={destino}
-            onChangeText={setDestino}
-          />
-          
-          <TouchableOpacity style={styles.input} onPress={toggleCalendar}>
-            <Text style={styles.placeholderText}>{data || 'Data'}</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={styles.input}>
-            <RNPickerSelect
-              onValueChange={handleHorarioSelect}
-              items={horarioOptions}
-              placeholder={{ 
-                label: 'Horário', 
-                value: null,
-                color: '#fff',
-                fontWeight: 'bold',
-                }}
-              value={horario}
-              style={{
-                inputAndroid: {
-                  color: horario ? '#fff' : '#999',
-                  fontSize: 18,
-                  fontWeight: 'bold',
-                  textAlign: 'center',
-                },
-                inputIOS: {
-                  color: horario ? '#fff' : '#999',
-                  fontSize: 18,
-                  fontWeight: 'bold',
-                  textAlign: 'center',
-                },
-                placeholder: {
-                  color: '#fff',
-                  fontWeight: 'bold',
-                  fontSize: 18,
-                  textAlign: 'center',
-                },
-              }}
-            />
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={styles.pickerContainer} onPress={toggleModal}>
-            <Text style={styles.pickerLabel}>{vagasDisponiveis || 'Número de pessoas'}</Text>
-          </TouchableOpacity>
+            <View style={styles.form}>
+              <Text style={styles.label}>Origem</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="De onde você vai partir?"
+                placeholderTextColor="#999"
+                value={origem}
+                onChangeText={setOrigem}
+              />
 
-          <Modal
-            visible={isModalVisible}
-            transparent={true}
-            animationType="slide"
-            onRequestClose={toggleModal}
-          >
-            <View style={styles.modalBackground}>
-              <View style={styles.modalContent}>
-                <FlatList
-                  data={options}
-                  renderItem={({ item }) => (
-                    <TouchableOpacity
-                      style={styles.option}
-                      onPress={() => handleOptionSelect(item)}
-                    >
-                      <Text style={styles.optionText}>{item}</Text>
-                    </TouchableOpacity>
-                  )}
-                  keyExtractor={(item) => item}
-                />
+              <Text style={styles.label}>Destino</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Para onde você quer ir?"
+                placeholderTextColor="#999"
+                value={destino}
+                onChangeText={setDestino}
+              />
+
+              <Text style={styles.label}>Data</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="DD/MM/AAAA"
+                placeholderTextColor="#999"
+                value={data}
+                onChangeText={setData}
+                keyboardType="numeric"
+              />
+
+              <Text style={styles.label}>Horário</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="HH:MM"
+                placeholderTextColor="#999"
+                value={horario}
+                onChangeText={setHorario}
+                keyboardType="numeric"
+              />
+
+              <TouchableOpacity
+                style={styles.button}
+                onPress={handleBuscar}
+              >
+                <Text style={styles.buttonText}>Buscar Caronas</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.resultsSection}>
+              <Text style={styles.sectionTitle}>Caronas Disponíveis</Text>
+              <View style={styles.resultCard}>
+                <Text style={styles.resultText}>Nenhuma carona encontrada ainda.</Text>
+                <Text style={styles.resultSubtext}>Faça uma busca para ver resultados</Text>
               </View>
             </View>
-          </Modal>
-
-          <Modal
-            visible={isCalendarVisible}
-            transparent={true}
-            animationType="slide"
-            onRequestClose={toggleCalendar}
-          >
-            <View style={styles.modalBackground}>
-              <View style={styles.modalContent}>
-                <Calendar
-                  current={today}
-                  minDate={today}
-                  onDayPress={handleDateSelect}
-                  theme={{
-                    todayTextColor: '#ff4800',
-                    arrowColor: '#ff4800',
-                    monthTextColor: '#fff',
-                    textDayFontWeight: 'bold',
-                    textMonthFontWeight: 'bold',
-                    textDayHeaderFontWeight: 'bold',
-                    textDayColor: '#fff',
-                    textMonthColor: '#fff',
-                    textDayHeaderFontSize: 16,
-                    textMonthFontSize: 18,
-                    textDayFontSize: 16,
-                    backgroundColor: '#12023d',
-                    calendarBackground: '#12023d',
-                  }}
-                />
-              </View>
-            </View>
-          </Modal>
-
-          <TouchableOpacity 
-            style={styles.button} 
-            onPress={() => navigation.navigate('Match')}>
-            <Text style={styles.buttonText}>Confirmar</Text>
-          </TouchableOpacity>
-
-        </SafeAreaView>
-      </ScrollView>
-    </KeyboardAvoidingView>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#12023d',
+    backgroundColor: '#6B46C1',
   },
-  innerContainer: {
+  keyboardView: {
     flex: 1,
-    padding: 16,
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  content: {
+    flex: 1,
+    padding: 20,
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: 30,
+    marginTop: 10,
   },
   title: {
-    marginTop: 40,
-    fontSize: 48,
+    fontSize: 32,
     fontWeight: 'bold',
-    marginBottom: 16,
-    textAlign: 'center',
-    color: '#fff',
+    color: '#FFF',
+    marginBottom: 10,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#E9D5FF',
+  },
+  form: {
+    width: '100%',
+    marginBottom: 30,
+  },
+  label: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 8,
+    marginTop: 10,
   },
   input: {
-    fontSize: 18,
-    textAlign: 'center',
-    color: '#fff',
-    margin: 10,
-    height: 50,
-    borderColor: '#4f0466',
-    borderWidth: 4,
-    marginBottom: 12,
-    paddingHorizontal: 10,
-    borderRadius: 24,
-    fontWeight: 'bold',
-    justifyContent: 'center',
-  },
-  placeholderText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  pickerContainer: {
-    margin: 10,
-    borderColor: '#4f0466',
-    borderWidth: 4,
-    borderRadius: 24,
-    paddingHorizontal: 10,
-    paddingVertical: 15,
-    justifyContent: 'center',
-    backgroundColor: '#12023d',
-  },
-  pickerLabel: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  modalBackground: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-  },
-  modalContent: {
-    backgroundColor: '#12023d',
+    backgroundColor: '#FFF',
     borderRadius: 10,
-    width: '80%',
+    padding: 15,
+    fontSize: 16,
+    color: '#333',
+  },
+  button: {
+    backgroundColor: '#F97316',
+    borderRadius: 10,
+    padding: 18,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  buttonText: {
+    color: '#FFF',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  resultsSection: {
+    marginTop: 20,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#FFF',
+    marginBottom: 15,
+  },
+  resultCard: {
+    backgroundColor: '#FFF',
+    borderRadius: 10,
     padding: 20,
     alignItems: 'center',
   },
-  option: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-    width: '100%',
-  },
-  optionText: {
+  resultText: {
     fontSize: 16,
-    color: '#fff',
+    color: '#666',
+    marginBottom: 5,
   },
-  button: {
-    backgroundColor: '#ff4800',
-    borderWidth: 2,
-    borderRadius: 24,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    alignItems: 'center',
-    marginTop: 20,
-    width: 300,
-    alignSelf: 'center',
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
+  resultSubtext: {
+    fontSize: 14,
+    color: '#999',
   },
 });
 
-export default BuscarCarona;
