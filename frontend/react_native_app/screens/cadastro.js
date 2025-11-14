@@ -27,94 +27,123 @@ export default function CadastroScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
 
   const handleCadastro = async () => {
-    // Validação básica
-    if (!nome || !cpf || !email || !matricula || !curso || !senha) {
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // 🔎 validação de campos obrigatórios
+    if (!nome || !cpf || !normalizedEmail || !matricula || !curso || !senha) {
       Alert.alert('Erro', 'Por favor, preencha todos os campos obrigatórios.');
       return;
     }
 
+    // 🔐 tamanho mínimo de senha
     if (senha.length < 6) {
       Alert.alert('Erro', 'A senha deve ter pelo menos 6 caracteres.');
+      return;
+    }
+
+    // 📧 obrigar e-mail institucional
+    if (!normalizedEmail.endsWith('@alunos.unimetrocamp.edu.br')) {
+      Alert.alert(
+        'E-mail institucional obrigatório',
+        'Use seu e-mail institucional no formato: suamatricula@alunos.unimetrocamp.edu.br'
+      );
+      return;
+    }
+
+    // validação básica de formato de e-mail
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(normalizedEmail)) {
+      Alert.alert('Erro', 'Formato de e-mail inválido.');
       return;
     }
 
     setLoading(true);
 
     try {
-      // Criar usuário no Supabase Auth
+      // 1) Criar usuário no Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: email.trim(),
+        email: normalizedEmail,
         password: senha,
       });
 
       if (authError) {
+        console.log('[CADASTRO] Erro Supabase Auth:', authError);
         Alert.alert('Erro no Cadastro', authError.message);
         setLoading(false);
         return;
       }
 
-      if (authData.user) {
-        // Salvar dados do perfil no Supabase usando os nomes corretos das colunas
-        const normalizedEmail = email.trim().toLowerCase();
-        
-        const { error: profileError } = await supabase
-          .from('perfis')
-          .insert([
-            {
-              id: authData.user.id,
-              nomeCompleto: nome,           // camelCase
-              'e-mail': normalizedEmail,    // com hífen
-              telefone: telefone || '',
-              cpf: cpf,
-              matrícula: matricula,        // com acento
-              curso: curso,
-              é_motorista: false,          // com acento e underscore
-            },
-          ]);
-
-        if (profileError) {
-          console.error('Erro ao salvar perfil:', profileError);
-          Alert.alert(
-            'Aviso',
-            `Usuário criado, mas houve um problema ao salvar o perfil: ${profileError.message}. Você pode atualizar seu perfil depois.`
-          );
-        } else {
-          console.log('✅ Perfil salvo com sucesso no Supabase');
-        }
-
-        // Salvar dados do perfil localmente também
-        const perfil = {
-          nome,
-          cpf,
-          email: email.trim(),
-          telefone: telefone || '',
-          matricula,
-          curso,
-        };
-        
-        await AsyncStorage.setItem('perfil', JSON.stringify(perfil));
-        
-        // Resetar loading antes de mostrar alerta
+      if (!authData || !authData.user) {
+        console.log('[CADASTRO] signUp retornou sem user');
         setLoading(false);
-        
-        // Mostrar alerta de sucesso e navegar
-        Alert.alert(
-          'Sucesso!',
-          'Conta criada com sucesso!',
-          [
-            {
-              text: 'OK',
-              onPress: () => {
-                navigation.replace('Login');
-              },
-            },
-          ]
-        );
-      } else {
-        setLoading(false);
+        Alert.alert('Erro', 'Não foi possível criar a conta. Tente novamente.');
+        return;
       }
+
+      // 2) Salvar dados do perfil na tabela "perfis"
+      //    Usa exatamente os nomes das colunas do print:
+      //    id, nomeCompleto, email, telefone, cpf, matricula, curso, is_motorista
+      const { error: profileError } = await supabase
+        .from('perfis')
+        .insert([
+          {
+            id: authData.user.id,      // liga o perfil ao usuário do Auth
+            nomeCompleto: nome,
+            email: normalizedEmail,
+            telefone: telefone || '',
+            cpf: cpf,
+            matricula: matricula,
+            curso: curso,
+            is_motorista: false,       // por padrão não é motorista
+          },
+        ]);
+
+      if (profileError) {
+        console.log(
+          '[CADASTRO] Erro ao salvar perfil:',
+          profileError.message,
+          profileError.details,
+          profileError.hint,
+          profileError.code
+        );
+
+        Alert.alert(
+          'Erro ao salvar perfil',
+          profileError.message ||
+            'Usuário foi criado no Auth, mas houve erro ao salvar os dados do perfil. Verifique a tabela "perfis" no Supabase.'
+        );
+
+        setLoading(false);
+        return; // não mostra alerta de sucesso
+      }
+
+      console.log('✅ Perfil salvo com sucesso no Supabase');
+
+      // 3) Salvar dados localmente
+      const perfil = {
+        nome,
+        cpf,
+        email: normalizedEmail,
+        telefone: telefone || '',
+        matricula,
+        curso,
+      };
+
+      await AsyncStorage.setItem('perfil', JSON.stringify(perfil));
+
+      setLoading(false);
+
+      // 4) Mostrar alerta de sucesso e ir para Login
+      Alert.alert('Sucesso!', 'Conta criada com sucesso!', [
+        {
+          text: 'OK',
+          onPress: () => {
+            navigation.replace('Login');
+          },
+        },
+      ]);
     } catch (error) {
-      console.error('Erro no cadastro:', error);
+      console.error('Erro no cadastro (try/catch):', error);
       setLoading(false);
       Alert.alert('Erro', 'Não foi possível criar a conta. Tente novamente.');
     }
@@ -152,7 +181,7 @@ export default function CadastroScreen({ navigation }) {
               />
               <TextInput
                 style={styles.input}
-                placeholder="Email"
+                placeholder="E-mail institucional"
                 placeholderTextColor="#999"
                 value={email}
                 onChangeText={setEmail}
@@ -287,4 +316,3 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
-
