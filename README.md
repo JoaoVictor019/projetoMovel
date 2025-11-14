@@ -143,10 +143,9 @@ Capture todas as telas do projeto e identifique-as
 <img width="1278" height="887" alt="image" src="https://github.com/user-attachments/assets/3b265db4-17cf-40ed-82d5-7365f81801ee" />
 
 
-Tela 3: recuperação de senha
+<img width="1276" height="710" alt="image" src="https://github.com/user-attachments/assets/1f19c80c-301e-412b-93c4-16e17d337634" />
 
 <img width="1279" height="886" alt="image" src="https://github.com/user-attachments/assets/2ae656c3-68fe-46b3-95ec-b2302dbdbc24" />
-
 
 <img width="1278" height="890" alt="image" src="https://github.com/user-attachments/assets/ee8e7d5b-69fb-405f-a604-0ece649ecb63" />
 
