@@ -142,14 +142,13 @@ Capture todas as telas do projeto e identifique-as
 
 <img width="1278" height="887" alt="image" src="https://github.com/user-attachments/assets/3b265db4-17cf-40ed-82d5-7365f81801ee" />
 
-
 <img width="1276" height="710" alt="image" src="https://github.com/user-attachments/assets/1f19c80c-301e-412b-93c4-16e17d337634" />
 
-<img width="1279" height="886" alt="image" src="https://github.com/user-attachments/assets/2ae656c3-68fe-46b3-95ec-b2302dbdbc24" />
+<img width="1279" height="885" alt="image" src="https://github.com/user-attachments/assets/3f5ace67-160b-4293-953f-5fd7fcbcbe20" />
 
-<img width="1278" height="890" alt="image" src="https://github.com/user-attachments/assets/ee8e7d5b-69fb-405f-a604-0ece649ecb63" />
+<img width="1279" height="804" alt="image" src="https://github.com/user-attachments/assets/6b97bca4-88e9-49c6-8120-03a45dcf8145" />
 
-<img width="1264" height="892" alt="image" src="https://github.com/user-attachments/assets/1346bb30-7936-4740-9bd2-90186a9669e3" />
+<img width="1277" height="845" alt="image" src="https://github.com/user-attachments/assets/c4fdf23e-7daa-414c-9314-328b1626b6c4" />
 
 <img width="1278" height="886" alt="image" src="https://github.com/user-attachments/assets/b0fff35b-74de-4e34-a7c9-16ce101d6fc2" />
 
