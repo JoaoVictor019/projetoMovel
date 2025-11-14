@@ -138,17 +138,23 @@ npx expo start
 ## Telas do projeto
 Capture todas as telas do projeto e identifique-as
 
-Tela 1: login
+<img width="1264" height="705" alt="image" src="https://github.com/user-attachments/assets/9a26741a-41c5-4775-a7e0-3ccb0b9d08ce" />
 
-Tela 2: criação de usuário
+<img width="1278" height="887" alt="image" src="https://github.com/user-attachments/assets/3b265db4-17cf-40ed-82d5-7365f81801ee" />
+
 
 Tela 3: recuperação de senha
 
-Tela 4: tela inicial
-
-e assim por diante...
+<img width="1279" height="886" alt="image" src="https://github.com/user-attachments/assets/2ae656c3-68fe-46b3-95ec-b2302dbdbc24" />
 
 
+<img width="1278" height="890" alt="image" src="https://github.com/user-attachments/assets/ee8e7d5b-69fb-405f-a604-0ece649ecb63" />
+
+<img width="1264" height="892" alt="image" src="https://github.com/user-attachments/assets/1346bb30-7936-4740-9bd2-90186a9669e3" />
+
+<img width="1278" height="886" alt="image" src="https://github.com/user-attachments/assets/b0fff35b-74de-4e34-a7c9-16ce101d6fc2" />
+
+<img width="1278" height="708" alt="image" src="https://github.com/user-attachments/assets/4342cfc0-171d-4587-adfc-cc832a8dcec3" />
 
 
 
