@@ -63,18 +63,18 @@ export default function LoginScreen({ navigation }) {
   const carregarPerfilDoSupabase = async (userId) => {
     try {
       const { data, error } = await supabase
-        .from('usuarios')
+        .from('perfis')
         .select('*')
         .eq('id', userId)
         .single();
 
       if (data && !error) {
         const perfil = {
-          nome: data.nome_completo || '',
+          nome: data.nomeCompleto || '',           // camelCase
           cpf: data.cpf || '',
-          email: data.email || email,
+          email: data['e-mail'] || email,         // com hífen
           telefone: data.telefone || '',
-          matricula: data.matricula || '',
+          matricula: data.matrícula || '',         // com acento
           curso: data.curso || '',
         };
         await AsyncStorage.setItem('perfil', JSON.stringify(perfil));

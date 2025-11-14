@@ -36,26 +36,26 @@ export default function PerfilScreen({ navigation }) {
       
       if (user) {
         const { data, error } = await supabase
-          .from('usuarios')
+          .from('perfis')
           .select('*')
           .eq('id', user.id)
           .single();
 
         if (data && !error) {
-          setNome(data.nome_completo || '');
+          setNome(data.nomeCompleto || '');           // camelCase
           setCpf(data.cpf || '');
-          setEmail(data.email || '');
+          setEmail(data['e-mail'] || '');             // com hífen
           setTelefone(data.telefone || '');
-          setMatricula(data.matricula || '');
+          setMatricula(data.matrícula || '');         // com acento
           setCurso(data.curso || '');
           
           // Salvar localmente também
           const perfil = {
-            nome: data.nome_completo || '',
+            nome: data.nomeCompleto || '',
             cpf: data.cpf || '',
-            email: data.email || '',
+            email: data['e-mail'] || '',
             telefone: data.telefone || '',
-            matricula: data.matricula || '',
+            matricula: data.matrícula || '',
             curso: data.curso || '',
           };
           await AsyncStorage.setItem('perfil', JSON.stringify(perfil));
@@ -86,15 +86,15 @@ export default function PerfilScreen({ navigation }) {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (user) {
-        // Atualizar no Supabase
+        // Atualizar no Supabase usando os nomes corretos das colunas
         const { error } = await supabase
-          .from('usuarios')
+          .from('perfis')
           .update({
-            nome_completo: nome,
+            nomeCompleto: nome,           // camelCase
             cpf: cpf,
-            email: email.trim(),
+            'e-mail': email.trim(),      // com hífen
             telefone: telefone || '',
-            matricula: matricula,
+            matrícula: matricula,        // com acento
             curso: curso,
           })
           .eq('id', user.id);

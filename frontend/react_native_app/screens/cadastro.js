@@ -54,24 +54,32 @@ export default function CadastroScreen({ navigation }) {
       }
 
       if (authData.user) {
-        // Salvar dados do perfil no Supabase
+        // Salvar dados do perfil no Supabase usando os nomes corretos das colunas
+        const normalizedEmail = email.trim().toLowerCase();
+        
         const { error: profileError } = await supabase
-          .from('usuarios')
+          .from('perfis')
           .insert([
             {
               id: authData.user.id,
-              nome_completo: nome,
-              cpf: cpf,
-              email: email.trim(),
+              nomeCompleto: nome,           // camelCase
+              'e-mail': normalizedEmail,    // com hífen
               telefone: telefone || '',
-              matricula: matricula,
+              cpf: cpf,
+              matrícula: matricula,        // com acento
               curso: curso,
+              é_motorista: false,          // com acento e underscore
             },
           ]);
 
         if (profileError) {
           console.error('Erro ao salvar perfil:', profileError);
-          // Mesmo com erro no perfil, o usuário foi criado no auth
+          Alert.alert(
+            'Aviso',
+            `Usuário criado, mas houve um problema ao salvar o perfil: ${profileError.message}. Você pode atualizar seu perfil depois.`
+          );
+        } else {
+          console.log('✅ Perfil salvo com sucesso no Supabase');
         }
 
         // Salvar dados do perfil localmente também
