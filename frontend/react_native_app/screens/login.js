@@ -22,42 +22,74 @@ export default function LoginScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Não carregar email automaticamente - deixar o usuário digitar
-    // carregarEmailSalvo();
-    verificarSessao();
-  }, []);
-
-  const verificarSessao = async () => {
-    try {
+    const inicializar = async () => {
+      // Verificar se já há sessão ativa
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        // Usuário já está logado, navegar para Home
         navigation.navigate('Home');
+      } else {
+        // Só carrega os dados de login se não houver sessão
+        carregarDadosLogin();
       }
-    } catch (error) {
-      console.error('Erro ao verificar sessão:', error);
-    }
-  };
+    };
+    inicializar();
+  }, []);
 
-  const carregarEmailSalvo = async () => {
+
+  const carregarDadosLogin = async () => {
     try {
-      const perfilData = await AsyncStorage.getItem('perfil');
-      if (perfilData) {
-        const perfil = JSON.parse(perfilData);
-        if (perfil.email) {
-          setEmail(perfil.email);
-          console.log('Email carregado do AsyncStorage:', perfil.email);
+      const dadosLoginData = await AsyncStorage.getItem('dadosLogin');
+      if (dadosLoginData) {
+        const dadosLogin = JSON.parse(dadosLoginData);
+        if (dadosLogin.email) {
+          setEmail(dadosLogin.email);
         }
+        if (dadosLogin.senha) {
+          setSenha(dadosLogin.senha);
+        }
+        console.log('Dados de login carregados do AsyncStorage');
       }
     } catch (error) {
-      console.error('Erro ao carregar email:', error);
+      console.error('Erro ao carregar dados de login:', error);
     }
   };
 
   const handleLogin = async () => {
-    // Navegação simples para teste
-    console.log('Botão Entrar clicado - navegando para Home');
-    navigation.replace('Home');
+    // Validar se ambos os campos estão preenchidos
+    if (!email.trim() || !senha.trim()) {
+      Alert.alert('Erro', 'Por favor, preencha todos os campos.');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Fazer login no Supabase
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim().toLowerCase(),
+        password: senha,
+      });
+
+      if (error) {
+        console.log('[LOGIN] Erro Supabase Auth:', error);
+        Alert.alert('Erro no Login', error.message);
+        setLoading(false);
+        return;
+      }
+
+      if (data?.user) {
+        // Carregar perfil do Supabase
+        await carregarPerfilDoSupabase(data.user.id);
+        
+        // Navegar para Home
+        navigation.replace('Home');
+      }
+    } catch (error) {
+      console.error('Erro no login:', error);
+      Alert.alert('Erro', 'Não foi possível fazer login. Tente novamente.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const carregarPerfilDoSupabase = async (userId) => {
@@ -70,11 +102,11 @@ export default function LoginScreen({ navigation }) {
 
       if (data && !error) {
         const perfil = {
-          nome: data.nomeCompleto || '',           // camelCase
+          nome: data.nomeCompleto || '',
           cpf: data.cpf || '',
-          email: data['e-mail'] || email,         // com hífen
+          email: data.email || email,
           telefone: data.telefone || '',
-          matricula: data.matrícula || '',         // com acento
+          matricula: data.matricula || '',
           curso: data.curso || '',
         };
         await AsyncStorage.setItem('perfil', JSON.stringify(perfil));
@@ -119,16 +151,12 @@ export default function LoginScreen({ navigation }) {
           />
 
           <TouchableOpacity
-            style={[styles.button, loading && styles.buttonDisabled]}
-            onPress={(e) => {
-              console.log('🎯 BOTÃO PRESSIONADO!');
-              console.log('Event:', e);
-              e?.preventDefault?.();
-              handleLogin();
-            }}
-            onPressIn={() => console.log('onPressIn disparado')}
-            onPressOut={() => console.log('onPressOut disparado')}
-            disabled={loading}
+            style={[
+              styles.button,
+              (loading || !email.trim() || !senha.trim()) && styles.buttonDisabled,
+            ]}
+            onPress={handleLogin}
+            disabled={loading || !email.trim() || !senha.trim()}
             activeOpacity={0.7}
           >
             {loading ? (
