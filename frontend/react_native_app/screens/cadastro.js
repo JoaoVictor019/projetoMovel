@@ -131,9 +131,16 @@ export default function CadastroScreen({ navigation }) {
 
       await AsyncStorage.setItem('perfil', JSON.stringify(perfil));
 
+      // 4) Salvar email e senha para uso na tela de login
+      const dadosLogin = {
+        email: normalizedEmail,
+        senha: senha,
+      };
+      await AsyncStorage.setItem('dadosLogin', JSON.stringify(dadosLogin));
+
       setLoading(false);
 
-      // 4) Mostrar alerta de sucesso e ir para Login
+      // 5) Mostrar alerta de sucesso e ir para Login
       Alert.alert('Sucesso!', 'Conta criada com sucesso!', [
         {
           text: 'OK',
