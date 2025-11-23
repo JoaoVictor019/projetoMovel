@@ -9,8 +9,10 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Alert,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import supabase from '../services/supabase';
 
 export default function OferecerCaronaScreen({ navigation }) {
   const [origem, setOrigem] = useState('');
@@ -19,11 +21,122 @@ export default function OferecerCaronaScreen({ navigation }) {
   const [horario, setHorario] = useState('');
   const [vagas, setVagas] = useState('');
   const [observacoes, setObservacoes] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleOferecer = () => {
-    // Lógica de oferta de carona aqui
-    console.log('Oferecer carona:', { origem, destino, data, horario, vagas, observacoes });
-    // Salvar carona e mostrar confirmação
+  // 🗓️ máscara de data DD/MM/AAAA
+  const formatarData = (texto) => {
+    const somenteDigitos = texto.replace(/\D/g, '').slice(0, 8); // ddmmaaaa
+
+    let formatado = somenteDigitos;
+
+    if (somenteDigitos.length > 4) {
+      formatado = `${somenteDigitos.slice(0, 2)}/${somenteDigitos.slice(
+        2,
+        4
+      )}/${somenteDigitos.slice(4)}`;
+    } else if (somenteDigitos.length > 2) {
+      formatado = `${somenteDigitos.slice(0, 2)}/${somenteDigitos.slice(2)}`;
+    }
+
+    return formatado;
+  };
+
+  // ⏰ máscara de horário HH:MM
+  const formatarHorario = (texto) => {
+    const somenteDigitos = texto.replace(/\D/g, '').slice(0, 4); // hhmm
+    let formatado = somenteDigitos;
+
+    if (somenteDigitos.length > 2) {
+      formatado = `${somenteDigitos.slice(0, 2)}:${somenteDigitos.slice(2)}`;
+    }
+
+    return formatado;
+  };
+
+  const handleOferecer = async () => {
+    if (!origem || !destino || !data || !horario || !vagas) {
+      Alert.alert('Campos obrigatórios', 'Preencha origem, destino, data, horário e vagas.');
+      return;
+    }
+
+    const vagasNum = parseInt(vagas, 10);
+    if (isNaN(vagasNum) || vagasNum <= 0) {
+      Alert.alert('Vagas inválidas', 'Informe um número de vagas maior que zero.');
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // usuário logado
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      if (authError || !authData?.user) {
+        Alert.alert('Erro', 'Não foi possível identificar o usuário logado.');
+        setLoading(false);
+        return;
+      }
+
+      const user = authData.user;
+
+      // pega nome do motorista na tabela "perfis"
+      let motoristaNome = 'Motorista';
+      const { data: perfil, error: perfilError } = await supabase
+        .from('perfis')
+        .select('nomeCompleto')
+        .eq('id', user.id)
+        .single();
+
+      if (!perfilError && perfil?.nomeCompleto) {
+        motoristaNome = perfil.nomeCompleto;
+      }
+
+      // salva na tabela "caronas"
+      const { error: insertError } = await supabase
+        .from('caronas')
+        .insert([
+          {
+            motorista_id: user.id,
+            motorista_nome: motoristaNome,
+            origem,
+            destino,
+            data,
+            horario,
+            vagas: vagasNum,
+            observacoes,
+          },
+        ]);
+
+      if (insertError) {
+        console.error('[OFERECER] Erro ao salvar carona:', insertError);
+        Alert.alert('Erro', 'Não foi possível publicar a carona.');
+        setLoading(false);
+        return;
+      }
+
+      Alert.alert(
+        'Sucesso!',
+        'Carona publicada com sucesso! Ela já pode aparecer na busca de outros alunos.',
+        [
+          {
+            text: 'OK',
+            onPress: () => navigation.navigate('Home'),
+          },
+        ]
+      );
+
+      // limpa campos
+      setOrigem('');
+      setDestino('');
+      setData('');
+      setHorario('');
+      setVagas('');
+      setObservacoes('');
+    } catch (error) {
+      console.error('[OFERECER] Erro inesperado:', error);
+      Alert.alert('Erro', 'Ocorreu um erro ao publicar a carona.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -35,6 +148,15 @@ export default function OferecerCaronaScreen({ navigation }) {
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.content}>
+
+            {/* 🔙 BOTÃO VOLTAR */}
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => navigation.navigate('Home')}
+            >
+              <Text style={styles.backButtonText}>← Voltar</Text>
+            </TouchableOpacity>
+
             <View style={styles.header}>
               <Text style={styles.title}>Oferecer Carona</Text>
               <Text style={styles.subtitle}>Compartilhe sua viagem</Text>
@@ -65,7 +187,7 @@ export default function OferecerCaronaScreen({ navigation }) {
                 placeholder="DD/MM/AAAA"
                 placeholderTextColor="#999"
                 value={data}
-                onChangeText={setData}
+                onChangeText={(texto) => setData(formatarData(texto))}
                 keyboardType="numeric"
               />
 
@@ -75,7 +197,7 @@ export default function OferecerCaronaScreen({ navigation }) {
                 placeholder="HH:MM"
                 placeholderTextColor="#999"
                 value={horario}
-                onChangeText={setHorario}
+                onChangeText={(texto) => setHorario(formatarHorario(texto))}
                 keyboardType="numeric"
               />
 
@@ -102,10 +224,13 @@ export default function OferecerCaronaScreen({ navigation }) {
               />
 
               <TouchableOpacity
-                style={styles.button}
+                style={[styles.button, loading && { opacity: 0.6 }]}
                 onPress={handleOferecer}
+                disabled={loading}
               >
-                <Text style={styles.buttonText}>Publicar Carona</Text>
+                <Text style={styles.buttonText}>
+                  {loading ? 'Publicando...' : 'Publicar Carona'}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -120,6 +245,21 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#6B46C1',
   },
+
+  backButton: {
+    alignSelf: 'flex-start',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    borderRadius: 6,
+    marginBottom: 10,
+  },
+  backButtonText: {
+    color: '#FFF',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+
   keyboardView: {
     flex: 1,
   },
@@ -179,4 +319,3 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
-

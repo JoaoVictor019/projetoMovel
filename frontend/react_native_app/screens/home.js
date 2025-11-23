@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   StyleSheet,
   Text,
@@ -10,7 +10,6 @@ import { StatusBar } from 'expo-status-bar';
 import supabase from '../services/supabase';
 
 export default function HomeScreen({ navigation }) {
-
 
   const handleLogout = async () => {
     try {
@@ -31,6 +30,7 @@ export default function HomeScreen({ navigation }) {
         </View>
 
         <View style={styles.menu}>
+
           <TouchableOpacity
             style={styles.menuButton}
             onPress={() => navigation.navigate('BuscarCarona')}
@@ -43,6 +43,14 @@ export default function HomeScreen({ navigation }) {
             onPress={() => navigation.navigate('OferecerCarona')}
           >
             <Text style={styles.menuButtonText}>Oferecer Carona</Text>
+          </TouchableOpacity>
+
+          {/* ⭐ NOVO BOTÃO: MINHAS CARONAS */}
+          <TouchableOpacity
+            style={styles.menuButton}
+            onPress={() => navigation.navigate('MinhasCaronas')}
+          >
+            <Text style={styles.menuButtonText}>Minhas Caronas</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -58,6 +66,7 @@ export default function HomeScreen({ navigation }) {
           >
             <Text style={styles.menuButtonText}>Cadastrar Carro</Text>
           </TouchableOpacity>
+
         </View>
 
         <TouchableOpacity
@@ -126,4 +135,3 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
-

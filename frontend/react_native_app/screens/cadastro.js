@@ -25,8 +25,14 @@ export default function CadastroScreen({ navigation }) {
   const [curso, setCurso] = useState('');
   const [senha, setSenha] = useState('');
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState(''); // ✅ nova mensagem de sucesso
 
   const handleCadastro = async () => {
+    // limpa mensagens antigas
+    setErrorMessage('');
+    setSuccessMessage('');
+
     const normalizedEmail = email.trim().toLowerCase();
 
     // 🔎 validação de campos obrigatórios
@@ -43,9 +49,8 @@ export default function CadastroScreen({ navigation }) {
 
     // 📧 obrigar e-mail institucional
     if (!normalizedEmail.endsWith('@alunos.unimetrocamp.edu.br')) {
-      Alert.alert(
-        'E-mail institucional obrigatório',
-        'Use seu e-mail institucional no formato: suamatricula@alunos.unimetrocamp.edu.br'
+      setErrorMessage(
+        'Somente é possível criar uma conta com e-mails @alunos.unimetrocamp.edu.br'
       );
       return;
     }
@@ -53,7 +58,7 @@ export default function CadastroScreen({ navigation }) {
     // validação básica de formato de e-mail
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(normalizedEmail)) {
-      Alert.alert('Erro', 'Formato de e-mail inválido.');
+      setErrorMessage('Formato de e-mail inválido.');
       return;
     }
 
@@ -81,20 +86,18 @@ export default function CadastroScreen({ navigation }) {
       }
 
       // 2) Salvar dados do perfil na tabela "perfis"
-      //    Usa exatamente os nomes das colunas do print:
-      //    id, nomeCompleto, email, telefone, cpf, matricula, curso, is_motorista
       const { error: profileError } = await supabase
         .from('perfis')
         .insert([
           {
-            id: authData.user.id,      // liga o perfil ao usuário do Auth
+            id: authData.user.id,
             nomeCompleto: nome,
             email: normalizedEmail,
             telefone: telefone || '',
             cpf: cpf,
             matricula: matricula,
             curso: curso,
-            is_motorista: false,       // por padrão não é motorista
+            is_motorista: false,
           },
         ]);
 
@@ -114,7 +117,7 @@ export default function CadastroScreen({ navigation }) {
         );
 
         setLoading(false);
-        return; // não mostra alerta de sucesso
+        return;
       }
 
       console.log('✅ Perfil salvo com sucesso no Supabase');
@@ -140,15 +143,8 @@ export default function CadastroScreen({ navigation }) {
 
       setLoading(false);
 
-      // 5) Mostrar alerta de sucesso e ir para Login
-      Alert.alert('Sucesso!', 'Conta criada com sucesso!', [
-        {
-          text: 'OK',
-          onPress: () => {
-            navigation.replace('Login');
-          },
-        },
-      ]);
+      // 5) Mostrar mensagem de sucesso na tela
+      setSuccessMessage('Cadastro realizado com sucesso! Faça login para continuar. 😊');
     } catch (error) {
       console.error('Erro no cadastro (try/catch):', error);
       setLoading(false);
@@ -191,9 +187,20 @@ export default function CadastroScreen({ navigation }) {
                 placeholder="E-mail institucional"
                 placeholderTextColor="#999"
                 value={email}
-                onChangeText={setEmail}
+                onChangeText={(text) => {
+                  setEmail(text);
+                  setErrorMessage('');
+                  setSuccessMessage('');
+                }}
                 keyboardType="email-address"
                 autoCapitalize="none"
+                onEndEditing={(e) => {
+                  const text = (e.nativeEvent.text || '').trim().toLowerCase();
+                  if (text && !text.includes('@')) {
+                    const completed = `${text}@alunos.unimetrocamp.edu.br`;
+                    setEmail(completed);
+                  }
+                }}
               />
               <TextInput
                 style={styles.input}
@@ -226,10 +233,28 @@ export default function CadastroScreen({ navigation }) {
                 secureTextEntry
               />
 
+              {/* mensagem de erro em tela */}
+              {errorMessage !== '' && (
+                <Text style={styles.errorText}>{errorMessage}</Text>
+              )}
+
+              {/* mensagem de sucesso + botão para login */}
+              {successMessage !== '' && (
+                <View style={styles.successContainer}>
+                  <Text style={styles.successText}>{successMessage}</Text>
+                  <TouchableOpacity
+                    style={styles.successButton}
+                    onPress={() => navigation.replace('Login')}
+                  >
+                    <Text style={styles.successButtonText}>Ir para login</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+
               <TouchableOpacity
                 style={[styles.button, loading && styles.buttonDisabled]}
                 onPress={handleCadastro}
-                disabled={loading}
+                disabled={loading || successMessage !== ''} // opcional: desativa depois do sucesso
               >
                 {loading ? (
                   <ActivityIndicator color="#FFF" />
@@ -319,6 +344,38 @@ const styles = StyleSheet.create({
   },
   footerLink: {
     color: '#F97316',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  errorText: {
+    color: 'red',
+    textAlign: 'center',
+    fontSize: 14,
+    marginBottom: 10,
+    fontWeight: '600',
+  },
+  successContainer: {
+    backgroundColor: '#BBF7D0',
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 10,
+    alignItems: 'center',
+  },
+  successText: {
+    color: '#166534',
+    textAlign: 'center',
+    fontSize: 14,
+    marginBottom: 8,
+    fontWeight: '600',
+  },
+  successButton: {
+    backgroundColor: '#16A34A',
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+  },
+  successButtonText: {
+    color: '#FFF',
     fontSize: 14,
     fontWeight: 'bold',
   },

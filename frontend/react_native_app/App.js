@@ -12,6 +12,7 @@ import CadastroCarro from './screens/carro';
 import PerfilScreen from './screens/perfil';
 import MatchScreen from './screens/match';
 import ConfirmarCarona from './screens/confirmar';
+import MinhasCaronasScreen from './screens/MinhasCaronas';
 
 const Stack = createStackNavigator();
 
@@ -74,12 +75,16 @@ const App = () => {
           component={ConfirmarCarona}
           options={{ headerShown: false }}
         />
+
+        {/* ⭐ NOVA ROTA: MINHAS CARONAS */}
+        <Stack.Screen
+          name="MinhasCaronas"
+          component={MinhasCaronasScreen}
+          options={{ headerShown: false }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
 };
 
 export default App;
-
-
-

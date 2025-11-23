@@ -31,7 +31,6 @@ export default function PerfilScreen({ navigation }) {
 
   const carregarPerfil = async () => {
     try {
-      // Primeiro tenta carregar do Supabase
       const { data: { user } } = await supabase.auth.getUser();
       
       if (user) {
@@ -42,14 +41,13 @@ export default function PerfilScreen({ navigation }) {
           .single();
 
         if (data && !error) {
-          setNome(data.nomeCompleto || '');           // camelCase
+          setNome(data.nomeCompleto || '');
           setCpf(data.cpf || '');
-          setEmail(data['e-mail'] || '');             // com hífen
+          setEmail(data['e-mail'] || '');
           setTelefone(data.telefone || '');
-          setMatricula(data.matrícula || '');         // com acento
+          setMatricula(data.matrícula || '');
           setCurso(data.curso || '');
           
-          // Salvar localmente também
           const perfil = {
             nome: data.nomeCompleto || '',
             cpf: data.cpf || '',
@@ -63,7 +61,6 @@ export default function PerfilScreen({ navigation }) {
         }
       }
 
-      // Se não encontrou no Supabase, tenta carregar do AsyncStorage
       const perfilData = await AsyncStorage.getItem('perfil');
       if (perfilData) {
         const perfil = JSON.parse(perfilData);
@@ -86,15 +83,14 @@ export default function PerfilScreen({ navigation }) {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (user) {
-        // Atualizar no Supabase usando os nomes corretos das colunas
         const { error } = await supabase
           .from('perfis')
           .update({
-            nomeCompleto: nome,           // camelCase
+            nomeCompleto: nome,
             cpf: cpf,
-            'e-mail': email.trim(),      // com hífen
+            'e-mail': email.trim(),
             telefone: telefone || '',
-            matrícula: matricula,        // com acento
+            matrícula: matricula,
             curso: curso,
           })
           .eq('id', user.id);
@@ -107,7 +103,6 @@ export default function PerfilScreen({ navigation }) {
         }
       }
 
-      // Salvar localmente também
       const perfil = {
         nome,
         cpf,
@@ -119,11 +114,7 @@ export default function PerfilScreen({ navigation }) {
       
       await AsyncStorage.setItem('perfil', JSON.stringify(perfil));
       
-      Alert.alert(
-        'Sucesso!',
-        'Perfil salvo com sucesso!',
-        [{ text: 'OK' }]
-      );
+      Alert.alert('Sucesso!', 'Perfil salvo com sucesso!', [{ text: 'OK' }]);
     } catch (error) {
       console.error('Erro ao salvar perfil:', error);
       Alert.alert('Erro', 'Não foi possível salvar o perfil.');
@@ -149,6 +140,15 @@ export default function PerfilScreen({ navigation }) {
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.content}>
+
+            {/* 🔙 BOTÃO VOLTAR */}
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => navigation.navigate('Home')}
+            >
+              <Text style={styles.backButtonText}>← Voltar</Text>
+            </TouchableOpacity>
+
             <View style={styles.header}>
               <Text style={styles.title}>Editar Perfil</Text>
               <Text style={styles.subtitle}>Atualize suas informações</Text>
@@ -237,6 +237,22 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#6B46C1',
   },
+
+  // 🔙 ESTILO DO BOTÃO VOLTAR
+  backButton: {
+    alignSelf: 'flex-start',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    borderRadius: 6,
+    marginBottom: 10,
+  },
+  backButtonText: {
+    color: '#FFF',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+
   keyboardView: {
     flex: 1,
   },
@@ -295,5 +311,3 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
 });
-
-
