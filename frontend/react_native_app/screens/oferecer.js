@@ -55,22 +55,29 @@ export default function OferecerCaronaScreen({ navigation }) {
 
   const handleOferecer = async () => {
     if (!origem || !destino || !data || !horario || !vagas) {
-      Alert.alert('Campos obrigatórios', 'Preencha origem, destino, data, horário e vagas.');
+      Alert.alert(
+        'Campos obrigatórios',
+        'Preencha origem, destino, data, horário e vagas.'
+      );
       return;
     }
 
     const vagasNum = parseInt(vagas, 10);
     if (isNaN(vagasNum) || vagasNum <= 0) {
-      Alert.alert('Vagas inválidas', 'Informe um número de vagas maior que zero.');
+      Alert.alert(
+        'Vagas inválidas',
+        'Informe um número de vagas maior que zero.'
+      );
       return;
     }
 
     try {
       setLoading(true);
 
-      // usuário logado
+      // pega usuário logado
       const { data: authData, error: authError } = await supabase.auth.getUser();
       if (authError || !authData?.user) {
+        console.error('[OFERECER] Erro ao pegar usuário:', authError);
         Alert.alert('Erro', 'Não foi possível identificar o usuário logado.');
         setLoading(false);
         return;
@@ -78,25 +85,12 @@ export default function OferecerCaronaScreen({ navigation }) {
 
       const user = authData.user;
 
-      // pega nome do motorista na tabela "perfis"
-      let motoristaNome = 'Motorista';
-      const { data: perfil, error: perfilError } = await supabase
-        .from('perfis')
-        .select('nomeCompleto')
-        .eq('id', user.id)
-        .single();
-
-      if (!perfilError && perfil?.nomeCompleto) {
-        motoristaNome = perfil.nomeCompleto;
-      }
-
       // salva na tabela "caronas"
       const { error: insertError } = await supabase
         .from('caronas')
         .insert([
           {
-            motorista_id: user.id,
-            motorista_nome: motoristaNome,
+            user_id: user.id,  // 👈 coluna que existe na tabela
             origem,
             destino,
             data,

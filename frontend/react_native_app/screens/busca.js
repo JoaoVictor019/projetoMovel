@@ -26,7 +26,6 @@ export default function BuscarCaronaScreen({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [caronaSelecionada, setCaronaSelecionada] = useState(null);
 
-  // máscaras iguais às que eu te passei antes
   const formatarData = (texto) => {
     const somenteDigitos = texto.replace(/\D/g, '').slice(0, 8);
     let formatado = somenteDigitos;
@@ -55,68 +54,63 @@ export default function BuscarCaronaScreen({ navigation }) {
   };
 
   const handleBuscar = async () => {
-    if (!origem || !destino || !data || !horario) {
-      Alert.alert(
-        'Campos obrigatórios',
-        'Preencha origem, destino, data e horário para buscar caronas.'
-      );
+  if (!origem || !destino || !data) {
+    Alert.alert(
+      'Campos obrigatórios',
+      'Preencha origem, destino, data e horário para buscar caronas.'
+    );
+    return;
+  }
+
+  try {
+    let query = supabase
+      .from('caronas')
+      .select('*')
+      .order('data', { ascending: true })
+      .order('horario', { ascending: true });
+
+    if (origem) {
+      query = query.ilike('origem', `%${origem}%`);
+    }
+    if (destino) {
+      query = query.ilike('destino', `%${destino}%`);
+    }
+    if (data) {
+      query = query.eq('data', data);
+    }
+   
+    const { data: resultado, error } = await query;
+
+    if (error) {
+      console.error('[BUSCAR] Erro Supabase:', error);
+      Alert.alert('Erro', 'Não foi possível buscar caronas agora.');
       return;
     }
 
-    try {
-      let query = supabase
-        .from('caronas')
-        .select('*')
-        .order('data', { ascending: true })
-        .order('horario', { ascending: true });
-
-      // filtros básicos (usar %texto% pra facilitar)
-      if (origem) {
-        query = query.ilike('origem', `%${origem}%`);
-      }
-      if (destino) {
-        query = query.ilike('destino', `%${destino}%`);
-      }
-      if (data) {
-        query = query.eq('data', data);
-      }
-      if (horario) {
-        // aqui podemos usar eq ou ilike pra permitir "18"
-        query = query.eq('horario', horario);
-      }
-
-      const { data: resultado, error } = await query;
-
-      if (error) {
-        console.error('[BUSCAR] Erro Supabase:', error);
-        Alert.alert('Erro', 'Não foi possível buscar caronas agora.');
-        return;
-      }
-
-      if (!resultado || resultado.length === 0) {
-        setCaronas([]);
-        Alert.alert('Nenhuma carona encontrada', 'Tente outro horário ou data.');
-        return;
-      }
-
-      // adapta pro formato usado no resto da tela
-      const caronasAdaptadas = resultado.map((c) => ({
-        id: c.id,
-        origem: c.origem,
-        destino: c.destino,
-        motorista: c.motorista_nome || 'Motorista',
-        vagas: c.vagas,
-        data: c.data,
-        horario: c.horario,
-        observacoes: c.observacoes,
-      }));
-
-      setCaronas(caronasAdaptadas);
-    } catch (error) {
-      console.error('[BUSCAR] Erro inesperado:', error);
-      Alert.alert('Erro', 'Ocorreu um erro ao buscar caronas.');
+    if (!resultado || resultado.length === 0) {
+      setCaronas([]);
+      Alert.alert('Nenhuma carona encontrada', 'Tente outro horário ou data.');
+      return;
     }
-  };
+
+    const caronasAdaptadas = resultado.map((c) => ({
+     id: c.id,
+     origem: c.origem,
+     destino: c.destino,
+     motorista: c.motorista_nome || 'Motorista',
+     vagas: c.vagas,
+     data: c.data,
+     horario: c.horario,
+     observacoes: c.observacoes,
+  }));
+
+    setCaronas(caronasAdaptadas);
+  } catch (error) {
+    console.error('[BUSCAR] Erro inesperado:', error);
+    Alert.alert('Erro', 'Ocorreu um erro ao buscar caronas.');
+  }
+};
+
 
   const abrirModal = (carona) => {
     setCaronaSelecionada(carona);
@@ -171,7 +165,7 @@ export default function BuscarCaronaScreen({ navigation }) {
         <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
           <View style={styles.content}>
 
-            {/* 🔙 BOTÃO VOLTAR */}
+           
             <TouchableOpacity
               style={styles.backButton}
               onPress={() => navigation.navigate('Home')}
@@ -253,7 +247,7 @@ export default function BuscarCaronaScreen({ navigation }) {
                         Dia {carona.data} às {carona.horario}
                       </Text>
                       <Text style={styles.resultDriver}>
-                        Motorista: {carona.motorista} • Vagas: {carona.vagas}
+                        Motorista: {carona.motorista || carona.motorista_nome} • Vagas: {carona.vagas}
                       </Text>
                     </TouchableOpacity>
                   ))}
@@ -278,8 +272,9 @@ export default function BuscarCaronaScreen({ navigation }) {
                 </Text>
 
                 <Text style={styles.modalInfo}>
-                  Motorista: {caronaSelecionada.motorista}
+                  Motorista: {caronaSelecionada.motorista || caronaSelecionada.motorista_nome}
                 </Text>
+
 
                 <Text style={styles.modalInfo}>
                   Vagas disponíveis: {caronaSelecionada.vagas}
@@ -308,7 +303,6 @@ export default function BuscarCaronaScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  // ... (pode manter exatamente os mesmos estilos que você já tinha)
   container: {
     flex: 1,
     backgroundColor: '#6B46C1',

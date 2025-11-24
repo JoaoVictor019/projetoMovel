@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -6,9 +6,9 @@ import {
   TextInput,
   TouchableOpacity,
   SafeAreaView,
+  ScrollView,
   KeyboardAvoidingView,
   Platform,
-  ScrollView,
   Alert,
   ActivityIndicator,
 } from 'react-native';
@@ -32,7 +32,7 @@ export default function PerfilScreen({ navigation }) {
   const carregarPerfil = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      
+
       if (user) {
         const { data, error } = await supabase
           .from('perfis')
@@ -41,19 +41,20 @@ export default function PerfilScreen({ navigation }) {
           .single();
 
         if (data && !error) {
+          // 👇 nomes corretos das colunas
           setNome(data.nomeCompleto || '');
           setCpf(data.cpf || '');
-          setEmail(data['e-mail'] || '');
+          setEmail(data.email || '');
           setTelefone(data.telefone || '');
-          setMatricula(data.matrícula || '');
+          setMatricula(data.matricula || '');
           setCurso(data.curso || '');
-          
+
           const perfil = {
             nome: data.nomeCompleto || '',
             cpf: data.cpf || '',
-            email: data['e-mail'] || '',
+            email: data.email || '',
             telefone: data.telefone || '',
-            matricula: data.matrícula || '',
+            matricula: data.matricula || '',
             curso: data.curso || '',
           };
           await AsyncStorage.setItem('perfil', JSON.stringify(perfil));
@@ -61,6 +62,7 @@ export default function PerfilScreen({ navigation }) {
         }
       }
 
+      // se não encontrar no Supabase, tenta local
       const perfilData = await AsyncStorage.getItem('perfil');
       if (perfilData) {
         const perfil = JSON.parse(perfilData);
@@ -78,19 +80,20 @@ export default function PerfilScreen({ navigation }) {
 
   const salvarPerfil = async () => {
     setLoading(true);
-    
+
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      
+
       if (user) {
         const { error } = await supabase
           .from('perfis')
           .update({
+            // 👇 nomes certos das colunas
             nomeCompleto: nome,
             cpf: cpf,
-            'e-mail': email.trim(),
+            email: email.trim(),
             telefone: telefone || '',
-            matrícula: matricula,
+            matricula: matricula,
             curso: curso,
           })
           .eq('id', user.id);
@@ -111,9 +114,9 @@ export default function PerfilScreen({ navigation }) {
         matricula,
         curso,
       };
-      
+
       await AsyncStorage.setItem('perfil', JSON.stringify(perfil));
-      
+
       Alert.alert('Sucesso!', 'Perfil salvo com sucesso!', [{ text: 'OK' }]);
     } catch (error) {
       console.error('Erro ao salvar perfil:', error);
@@ -141,7 +144,6 @@ export default function PerfilScreen({ navigation }) {
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.content}>
 
-            {/* 🔙 BOTÃO VOLTAR */}
             <TouchableOpacity
               style={styles.backButton}
               onPress={() => navigation.navigate('Home')}
@@ -237,8 +239,17 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#6B46C1',
   },
+  keyboardView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  content: {
+    flex: 1,
+    padding: 20,
+  },
 
-  // 🔙 ESTILO DO BOTÃO VOLTAR
   backButton: {
     alignSelf: 'flex-start',
     paddingVertical: 6,
@@ -253,16 +264,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 
-  keyboardView: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-  },
-  content: {
-    flex: 1,
-    padding: 20,
-  },
   header: {
     alignItems: 'center',
     marginBottom: 30,
