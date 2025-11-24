@@ -4,7 +4,6 @@
   "dev": true,
   "minify": false,
 <<<<<<< HEAD
-<<<<<<< HEAD
   "urlRandomness": "cfo5P9g",
 =======
   "urlRandomness": null,
@@ -12,8 +11,4 @@
   "https": false,
   "scheme": null,
   "devClient": false
-=======
-  "urlRandomness": null,
-  "https": false
->>>>>>> f75a63a5ba80427319674ef53c78446a17f4e3b9
 }
