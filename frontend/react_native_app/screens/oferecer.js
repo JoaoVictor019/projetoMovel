@@ -1,329 +1,312 @@
+// frontend/react_native_app/screens/oferecer.js
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, KeyboardAvoidingView, Platform, ScrollView, Modal, FlatList } from 'react-native';
-import { Calendar } from 'react-native-calendars';
-import moment from 'moment'; // Importa a biblioteca moment.js para formatação de data
-import RNPickerSelect from 'react-native-picker-select'; // Importa a biblioteca RNPickerSelect
-import { useNavigation } from '@react-navigation/native'; // Importa useNavigation
+import {
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  TouchableOpacity,
+  SafeAreaView,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Alert,
+} from 'react-native';
+import { StatusBar } from 'expo-status-bar';
+import supabase from '../services/supabase';
 
-const OferecerCarona = () => {
-  const navigation = useNavigation(); // Inicializa o hook de navegação
-  const [localizacaoAtual, setLocalizacaoAtual] = useState('');
+export default function OferecerCaronaScreen({ navigation }) {
+  const [origem, setOrigem] = useState('');
   const [destino, setDestino] = useState('');
   const [data, setData] = useState('');
   const [horario, setHorario] = useState('');
-  const [vagasDisponiveis, setVagasDisponiveis] = useState('');
-  const [isModalVisible, setModalVisible] = useState(false);
-  const [isCalendarVisible, setCalendarVisible] = useState(false);
-  const [isPickerVisible, setPickerVisible] = useState(false);
+  const [vagas, setVagas] = useState('');
+  const [observacoes, setObservacoes] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const options = ['1 vaga', '2 vagas', '3 vagas', '4 vagas'];
+  const formatarData = (texto) => {
+    const somenteDigitos = texto.replace(/\D/g, '').slice(0, 8);
+    let formatado = somenteDigitos;
 
-  const horarioOptions = [
-    { label: '08:00', value: '08:00' },
-    { label: '09:00', value: '09:00' },
-    { label: '10:00', value: '10:00' },
-    { label: '11:00', value: '11:00' },
-    { label: '12:00', value: '12:00' },
-    { label: '13:00', value: '13:00' },
-    { label: '14:00', value: '14:00' },
-    { label: '15:00', value: '15:00' },
-    { label: '16:00', value: '16:00' },
-    { label: '17:00', value: '17:00' },
-    { label: '18:00', value: '18:00' },
-    { label: '19:00', value: '19:00' },
-    { label: '20:00', value: '20:00' },
-    { label: '21:00', value: '21:00' },
-    { label: '22:00', value: '22:00' },
-  ];
+    if (somenteDigitos.length > 4) {
+      formatado = `${somenteDigitos.slice(0, 2)}/${somenteDigitos.slice(
+        2,
+        4
+      )}/${somenteDigitos.slice(4)}`;
+    } else if (somenteDigitos.length > 2) {
+      formatado = `${somenteDigitos.slice(0, 2)}/${somenteDigitos.slice(2)}`;
+    }
 
-  const handleOferecer = () => {
-    // Lógica para oferecer carona
+    return formatado;
   };
 
-  const toggleModal = () => {
-    setModalVisible(!isModalVisible);
-  }; //Seleção de vagas
+  const formatarHorario = (texto) => {
+    const somenteDigitos = texto.replace(/\D/g, '').slice(0, 4);
+    let formatado = somenteDigitos;
 
-  const toggleCalendar = () => {
-    setCalendarVisible(!isCalendarVisible);
-  }; //Calendário
+    if (somenteDigitos.length > 2) {
+      formatado = `${somenteDigitos.slice(0, 2)}:${somenteDigitos.slice(2)}`;
+    }
 
-  const togglePicker = () => {
-    setPickerVisible(!isPickerVisible);
-  }; //Para seleção de horário
-
-  const handleOptionSelect = (option) => {
-    setVagasDisponiveis(option);
-    toggleModal();
+    return formatado;
   };
 
-  const handleDateSelect = (day) => {
-    const formattedDate = moment(day.dateString).format('DD/MM/YYYY');
-    setData(formattedDate);
-    toggleCalendar();
-  };
+  const handleOferecer = async () => {
+    if (!origem || !destino || !data || !horario || !vagas) {
+      Alert.alert('Campos obrigatórios', 'Preencha origem, destino, data, horário e vagas.');
+      return;
+    }
 
-  const handleHorarioSelect = (value) => {
-    setHorario(value);
-    togglePicker();
-  };
+    const vagasNum = parseInt(vagas, 10);
+    if (isNaN(vagasNum) || vagasNum <= 0) {
+      Alert.alert('Vagas inválidas', 'Informe um número de vagas maior que zero.');
+      return;
+    }
 
-  const today = moment().format('YYYY-MM-DD'); // Formato 'YYYY-MM-DD'
+    try {
+      setLoading(true);
+
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      if (authError || !authData?.user) {
+        Alert.alert('Erro', 'Não foi possível identificar o usuário logado.');
+        setLoading(false);
+        return;
+      }
+
+      const user = authData.user;
+
+      let motoristaNome = 'Motorista';
+      const { data: perfil, error: perfilError } = await supabase
+        .from('perfis')
+        .select('nomeCompleto')
+        .eq('id', user.id)
+        .single();
+
+      if (!perfilError && perfil?.nomeCompleto) {
+        motoristaNome = perfil.nomeCompleto;
+      }
+
+      const { error: insertError } = await supabase
+        .from('caronas')
+        .insert([
+          {
+            motorista_id: user.id,
+            motorista_nome: motoristaNome,
+            origem,
+            destino,
+            data,
+            horario,
+            vagas: vagasNum,
+            observacoes,
+          },
+        ]);
+
+      if (insertError) {
+        console.error('[OFERECER] Erro ao salvar carona:', insertError);
+        Alert.alert('Erro', 'Não foi possível publicar a carona.');
+        setLoading(false);
+        return;
+      }
+
+      Alert.alert(
+        'Sucesso!',
+        'Carona publicada com sucesso! Ela já pode aparecer na busca de outros alunos.',
+        [
+          {
+            text: 'OK',
+            onPress: () => navigation.navigate('Home'),
+          },
+        ]
+      );
+
+      setOrigem('');
+      setDestino('');
+      setData('');
+      setHorario('');
+      setVagas('');
+      setObservacoes('');
+    } catch (error) {
+      console.error('[OFERECER] Erro inesperado:', error);
+      Alert.alert('Erro', 'Ocorreu um erro ao publicar a carona.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={80}
-    >
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <SafeAreaView style={styles.innerContainer}>
-          <Text style={styles.title}>Oferecer carona</Text>
+    <SafeAreaView style={styles.container}>
+      <StatusBar style="light" />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardView}
+      >
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <View style={styles.content}>
 
-          <TextInput
-            style={styles.input}
-            placeholder="Localização atual"
-            placeholderTextColor="#ccc"
-            value={localizacaoAtual}
-            onChangeText={setLocalizacaoAtual}
-          />
-          
-          <TextInput
-            style={styles.input}
-            placeholder="Destino"
-            placeholderTextColor="#ccc"
-            value={destino}
-            onChangeText={setDestino}
-          />
-          
-          <TouchableOpacity style={styles.input} onPress={toggleCalendar}>
-            <Text style={styles.placeholderText}>{data || 'Data'}</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={styles.input}>
-            <RNPickerSelect
-              onValueChange={handleHorarioSelect}
-              items={horarioOptions}
-              placeholder={{ 
-                label: 'Horário', 
-                value: null,
-                color: '#fff',
-                fontWeight: 'bold',
-               }}
-              value={horario}
-              style={{
-                inputAndroid: {
-                  color: horario ? '#fff' : '#999',
-                  fontSize: 18,
-                  fontWeight: 'bold',
-                  textAlign: 'center',
-                },
-                inputIOS: {
-                  color: horario ? '#fff' : '#999',
-                  fontSize: 18,
-                  fontWeight: 'bold',
-                  textAlign: 'center'
-                },
-                placeholder: {
-                  color: '#fff',
-                  fontWeight: 'bold', 
-                  fontSize: 18,
-                  textAlign: 'center'
-                },
-              }}
-            />
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={styles.pickerContainer} onPress={toggleModal}>
-            <Text style={styles.pickerLabel}>{vagasDisponiveis || 'Vagas disponíveis'}</Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => navigation.navigate('Home')}
+            >
+              <Text style={styles.backButtonText}>← Voltar</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity 
-            style={styles.addCarButton} // Aplique o estilo aqui
-            onPress={() => navigation.navigate('Carro')}
-
-          >
-            <Text style={styles.addCarText}>Adicionar carro</Text>
-          </TouchableOpacity>
-
-
-          <Modal
-            visible={isModalVisible}
-            transparent={true}
-            animationType="slide"
-            onRequestClose={toggleModal}
-          >
-            <View style={styles.modalBackground}>
-              <View style={styles.modalContent}>
-                <FlatList
-                  data={options}
-                  renderItem={({ item }) => (
-                    <TouchableOpacity
-                      style={styles.option}
-                      onPress={() => handleOptionSelect(item)}
-                    >
-                      <Text style={styles.optionText}>{item}</Text>
-                    </TouchableOpacity>
-                  )}
-                  keyExtractor={(item) => item}
-                />
-              </View>
+            <View style={styles.header}>
+              <Text style={styles.title}>Oferecer Carona</Text>
+              <Text style={styles.subtitle}>Compartilhe sua viagem</Text>
             </View>
-          </Modal>
 
-          <Modal
-            visible={isCalendarVisible}
-            transparent={true}
-            animationType="slide"
-            onRequestClose={toggleCalendar}
-          >
-            <View style={styles.modalBackground}>
-              <View style={styles.modalContent}>
-                <Calendar
-                  current={today}
-                  minDate={today}
-                  onDayPress={handleDateSelect}
-                  theme={{
-                    todayTextColor: '#ff4800',
-                    arrowColor: '#ff4800',
-                    monthTextColor: '#fff',
-                    textDayFontWeight: 'bold',
-                    textMonthFontWeight: 'bold',
-                    textDayHeaderFontWeight: 'bold',
-                    textDayColor: '#fff',
-                    textMonthColor: '#fff',
-                    textDayHeaderFontSize: 16,
-                    textMonthFontSize: 18,
-                    textDayFontSize: 16,
-                    backgroundColor: '#12023d',
-                    calendarBackground: '#12023d',
-                  }}
-                />
-              </View>
+            <View style={styles.form}>
+              <Text style={styles.label}>Origem</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="De onde você vai partir?"
+                placeholderTextColor="#999"
+                value={origem}
+                onChangeText={setOrigem}
+              />
+
+              <Text style={styles.label}>Destino</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Para onde você está indo?"
+                placeholderTextColor="#999"
+                value={destino}
+                onChangeText={setDestino}
+              />
+
+              <Text style={styles.label}>Data</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="DD/MM/AAAA"
+                placeholderTextColor="#999"
+                value={data}
+                onChangeText={(texto) => setData(formatarData(texto))}
+                keyboardType="numeric"
+              />
+
+              <Text style={styles.label}>Horário</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="HH:MM"
+                placeholderTextColor="#999"
+                value={horario}
+                onChangeText={(texto) => setHorario(formatarHorario(texto))}
+                keyboardType="numeric"
+              />
+
+              <Text style={styles.label}>Número de Vagas</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Quantas vagas disponíveis?"
+                placeholderTextColor="#999"
+                value={vagas}
+                onChangeText={setVagas}
+                keyboardType="numeric"
+              />
+
+              <Text style={styles.label}>Observações (Opcional)</Text>
+              <TextInput
+                style={[styles.input, styles.textArea]}
+                placeholder="Informações adicionais sobre a carona..."
+                placeholderTextColor="#999"
+                value={observacoes}
+                onChangeText={setObservacoes}
+                multiline
+                numberOfLines={4}
+                textAlignVertical="top"
+              />
+
+              <TouchableOpacity
+                style={[styles.button, loading && { opacity: 0.6 }]}
+                onPress={handleOferecer}
+                disabled={loading}
+              >
+                <Text style={styles.buttonText}>
+                  {loading ? 'Publicando...' : 'Publicar Carona'}
+                </Text>
+              </TouchableOpacity>
             </View>
-          </Modal>
-
-          <TouchableOpacity style={styles.button} onPress={handleOferecer}>
-            <Text style={styles.buttonText}>Confirmar</Text>
-          </TouchableOpacity>
-
-        </SafeAreaView>
-      </ScrollView>
-    </KeyboardAvoidingView>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#12023d',
+    backgroundColor: '#6B46C1',
   },
-  innerContainer: {
+  backButton: {
+    alignSelf: 'flex-start',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    borderRadius: 6,
+    marginBottom: 10,
+  },
+  backButtonText: {
+    color: '#FFF',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  keyboardView: {
     flex: 1,
-    padding: 16,
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  content: {
+    flex: 1,
+    padding: 20,
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: 30,
+    marginTop: 10,
   },
   title: {
-    marginTop: 40,
-    fontSize: 48,
+    fontSize: 32,
     fontWeight: 'bold',
-    marginBottom: 16,
-    textAlign: 'center',
-    color: '#fff',
+    color: '#FFF',
+    marginBottom: 10,
   },
-  input: {
-    fontSize: 18,
-    color: "#fff",
-    margin: 10,
-    height: 50,
-    borderColor: '#4f0466',
-    borderWidth: 4,
-    marginBottom: 12,
-    marginVertical: 10,
-    paddingHorizontal: 5,
-    borderRadius: 24,
-    fontWeight: 'bold',
-    justifyContent: 'center',
-    textAlign: 'center',
+  subtitle: {
+    fontSize: 16,
+    color: '#E9D5FF',
   },
-  placeholderText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  pickerContainer: {
-    margin: 10,
-    borderColor: '#4f0466',
-    borderWidth: 4,
-    borderRadius: 24,
-    paddingHorizontal: 10,
-    paddingVertical: 15,
-    justifyContent: 'center',
-    backgroundColor: '#12023d',
-  },
-  pickerLabel: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  modalBackground: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-  },
-  modalContent: {
-    backgroundColor: '#12023d',
-    borderRadius: 10,
-    width: '80%',
-    padding: 20,
-    alignItems: 'center',
-  },
-  option: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+  form: {
     width: '100%',
   },
-  optionText: {
+  label: {
+    color: '#FFF',
     fontSize: 16,
-    color: '#fff',
+    fontWeight: '600',
+    marginBottom: 8,
+    marginTop: 10,
+  },
+  input: {
+    backgroundColor: '#FFF',
+    borderRadius: 10,
+    padding: 15,
+    fontSize: 16,
+    color: '#333',
+  },
+  textArea: {
+    minHeight: 100,
+    paddingTop: 15,
   },
   button: {
-    backgroundColor: '#ff4800',
-    borderWidth: 2,
-    borderRadius: 24,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    backgroundColor: '#F97316',
+    borderRadius: 10,
+    padding: 18,
     alignItems: 'center',
     marginTop: 20,
-    width: 300,
-    alignSelf: 'center',
   },
   buttonText: {
-    color: 'white',
+    color: '#FFF',
     fontSize: 18,
     fontWeight: 'bold',
   },
-  addCarButton: {
-    marginVertical: 10,
-    paddingVertical: 15, 
-    borderColor: '#4f0466',
-    borderWidth: 4,
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center', 
-    backgroundColor: '#12023d', 
-  },
-  addCarText: {
-    fontSize: 18,
-    color: '#fff',
-    fontWeight: 'bold',
-    textAlign: 'center', 
-  },
-  
 });
-
-export default OferecerCarona;
