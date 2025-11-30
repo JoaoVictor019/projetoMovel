@@ -1,0 +1,86 @@
+* [33m7295811[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Delete apresentacao/VaiJunto-Conectando-Universitarios-com-Caronas-Inteligentes (1).pptx
+* [33m10d5983[m Add files via upload
+* [33mdfe9bd7[m Add files via upload
+* [33m2e60678[m a
+* [33m57b351d[m a
+* [33mf75a63a[m Atualizações gerais: caronas, busca, carro, perfil, navegação e integração supabase
+* [33m6b838d6[m Refactor login session verification and loading logic
+* [33mc4fcbd4[m Save email and password for login screen
+* [33m982289a[m documentacao_software
+* [33mddd38af[m Add files via upload
+* [33m1df0d09[m Delete apresentacao/VaiJunto.pptx
+* [33md82b175[m Add files via upload
+* [33m6709aa9[m Add files via upload
+* [33md9bf48a[m a
+* [33med3176a[m a
+* [33m0786c2a[m Add files via upload
+* [33m0594f07[m Update README.md
+* [33m1774a16[m Update README.md
+* [33mba28a5b[m Update README with new project screen images
+* [33m26ff4bf[m Update README.md
+* [33m8d252f5[m a
+* [33ma3fa3ba[m a
+* [33mffdb595[m Add RecuperarSenhaScreen for password recovery
+* [33m38f8491[m Update perfil.js
+* [33m0c6fdf2[m Create perfil.js
+* [33maaf24e2[m Refactor OferecerCarona to OferecerCaronaScreen
+* [33mf522916[m Refactor LoginScreen for email login and session check
+* [33m23c8285[m Refactor HomeScreen with SafeAreaView and logout
+* [33m7587ae8[m Refactor CadastroScreen for improved readability
+* [33m370716a[m Update busca.js
+* [33m85dfdc3[m a
+* [33m2211adb[m Update README with database access configuration
+* [33mbcac80b[m Adiciona modal de sucesso e melhorias na tela de cadastro
+* [33m149e3fe[m Remove django_backend
+* [33m962c4da[m Update README.md
+* [33mb8a2aea[m Atualiza README e ajustes locais
+* [33m053ff05[m a
+* [33m1a9cc6c[m a
+* [33m4ad7c51[m a
+* [33m1044d70[m Add DATABASE_KEY to README for database setup
+* [33m0e76ed2[m Clean up README and fix installation instructions
+*   [33m1be0b11[m Resolve conflitos no app.json
+[32m|[m[33m\[m  
+[32m|[m * [33m89feff8[m Delete react/react_native_app directory
+[32m|[m * [33m4e957d2[m Update Felipe do Santos' entry with correct year
+[32m|[m * [33med0c0e4[m Update team member ID in README.md
+[32m|[m * [33mbfac861[m Update README.md
+[32m|[m * [33mf15482c[m Revise README with project details and requirements
+[32m|[m * [33m2eadb81[m Update project title in README.md
+[32m|[m * [33m02765a7[m Update README.md
+[32m|[m * [33me7ebc54[m a
+[32m|[m * [33me2e222a[m a
+[32m|[m * [33m57eff13[m a
+[32m|[m * [33m0b22599[m a
+[32m|[m * [33m3929afd[m a
+[32m|[m *   [33m4b8a078[m Merge branch 'main' of https://github.com/JoaoVictor019/projetoMovel
+[32m|[m [34m|[m[35m\[m  
+[32m|[m [34m|[m * [33m4b6151b[m Delete App.js
+[32m|[m [34m|[m * [33m97a7656[m Delete react_native_app directory
+[32m|[m [34m|[m * [33m78005b2[m Delete django_backend directory
+[32m|[m [34m|[m * [33mcb17d15[m a
+[32m|[m [34m|[m * [33m4dd432f[m a
+[32m|[m [34m|[m * [33mc029197[m a
+[32m|[m [34m|[m * [33m2abb21c[m a
+[32m|[m [34m|[m * [33mfdca63a[m Update README.md
+[32m|[m [34m|[m * [33mdc00a80[m a
+[32m|[m [34m|[m * [33mc12b128[m a
+[32m|[m [34m|[m * [33m71372a9[m Add files via upload
+[32m|[m [34m|[m * [33m91eaa85[m Update README.md
+[32m|[m [34m|[m *   [33m3031875[m a
+[32m|[m [34m|[m [36m|[m[1;31m\[m  
+[32m|[m [34m|[m [36m|[m * [33m01fe12b[m Delete react_native_app
+[32m|[m [34m|[m [36m|[m * [33m6e327d2[m Create react_native_app
+[32m|[m [34m|[m [36m|[m * [33m61d9f90[m Delete frontend directory
+[32m|[m [34m|[m * [1;31m|[m [33m958cc3b[m Adiciona react_native_app e atualiza arquivos
+[32m|[m [34m|[m [1;31m|[m[1;31m/[m  
+[32m|[m [34m|[m * [33m5b7bc95[m a
+[32m|[m [34m|[m * [33m93ef53f[m Video
+[32m|[m [34m|[m * [33m542cbd2[m Modelos dos documentos
+[32m|[m [34m|[m * [33m391c8b6[m Documentacao
+[32m|[m [34m|[m * [33ma45f61e[m Backend
+[32m|[m [34m|[m * [33m515543c[m Frontend
+[32m|[m [34m|[m * [33m7dbe4f4[m Apresentacao
+[32m|[m [34m|[m * [33me31e138[m Initial commit
+[32m|[m * [33me2be890[m Importacao inicial do projeto VaiJunto
+* [33m2d609ab[m a
